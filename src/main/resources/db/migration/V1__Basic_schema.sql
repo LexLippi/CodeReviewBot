@@ -55,21 +55,33 @@ comment on column t_reviewer_programming_language.id is 'Идентификат�
 comment on column t_reviewer_programming_language.id_reviewer is 'Идентификатор ревьюера';
 comment on column t_reviewer_programming_language.id_programming_language is 'Идентификатор языка программирования';
 
-create table if not exists t_task(
+create table if not exists t_session(
     id                      serial primary key,
     id_reviewer             int null references t_reviewer(id),
     id_student              int not null references t_student(id),
     id_programming_language int not null references t_programming_language(id),
+    c_status                varchar(1) not null
+);
+
+comment on table t_session is 'Таблица сеансов между учеником и ревьюером';
+comment on column t_session.id is 'Идентификатор сеанса';
+comment on column t_session.id_reviewer is 'Идентификатор ревьюера';
+comment on column t_session.id_programming_language is
+    'Идентификатор языка программирования, для проверки кода на котором создан сеанс';
+comment on column t_session.id_student is 'Идентификатор студента';
+comment on column t_session.c_status is 'Статус сеанса';
+
+create table if not exists t_task(
+    id                      serial primary key,
     c_text                  text not null,
     c_review_text           text null,
-    c_status                varchar(1) not null
+    c_status                varchar(1) not null,
+    id_session              int not null references t_session(id)
 );
 
 comment on table t_task is 'Таблица задач, присланных для проверки';
 comment on column t_task.id is 'Идентификатор задачи';
-comment on column t_task.id_reviewer is 'Идентификатор ревьюера, который назначен для проверки задачи';
-comment on column t_task.id_programming_language is 'Идентификатор языка программирования, на котором написана задача';
-comment on column t_task.id_student is 'Идентификатор студента, отправившего задачу';
-comment on column t_task.c_text is 'Код на указанном языке программирования';
+comment on column t_task.c_text is 'Код на языке программирования, специализированном в сеансе';
 comment on column t_task.c_review_text is 'Текст ревью';
 comment on column t_task.c_status is 'Статус задачи';
+comment on column t_task.id_session is 'Идентификатор сеанса, к которому относится данная посылка кода'
