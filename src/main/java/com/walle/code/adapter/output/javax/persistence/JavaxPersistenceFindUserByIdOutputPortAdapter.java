@@ -1,27 +1,26 @@
 package com.walle.code.adapter.output.javax.persistence;
 
 import com.walle.code.adapter.output.row_mapper.RowMapper;
-import com.walle.code.domain.id.DiscordUserId;
+import com.walle.code.domain.id.UserId;
 import com.walle.code.dto.row.UserRow;
-import com.walle.code.port.output.FindUserByDiscordIdOutputPort;
+import com.walle.code.port.output.FindUserByIdOutputPort;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
-import java.util.Optional;
 
 /**
- * Реализация {@link FindUserByDiscordIdOutputPort} с использованием Javax Persistence.
+ * Реализация {@link FindUserByIdOutputPort} с использованием Javax Persistence.
  *
  * @author <a href="mailto:alekseilipatkin@mail.ru">Алексей Липаткин</a>.
  * @since 21.1.0
  */
 @RequiredArgsConstructor
-public final class JavaxPersistenceFindUserByDiscordIdOutputPortAdapter implements FindUserByDiscordIdOutputPort {
+public final class JavaxPersistenceFindUserByIdOutputPortAdapter implements FindUserByIdOutputPort {
 	public static final String QUERY = "select id, id_discord, c_nickname, c_first_name, c_surname, c_email " +
-			"from t_user where id_discord = :discordId";
-	public static final String PARAM_DISCORD_ID = "discordId";
+			"from t_user where id = :id";
+	public static final String PARAM_ID = "id";
 
 	@NonNull
 	private final EntityManager entityManager;
@@ -30,12 +29,13 @@ public final class JavaxPersistenceFindUserByDiscordIdOutputPortAdapter implemen
 	private final RowMapper<UserRow> rowMapper;
 
 	@Override
-	public Optional<UserRow> findUserByDiscordId(DiscordUserId discordId) {
+	public UserRow findUserById(UserId id) {
 		return this.entityManager.createQuery(QUERY, Tuple.class)
-				.setParameter(PARAM_DISCORD_ID, discordId.getValue())
+				.setParameter(PARAM_ID, id.getValue())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(this.rowMapper::mapRow)
+				.orElseThrow();
 	}
 }

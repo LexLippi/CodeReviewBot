@@ -1,5 +1,6 @@
 package com.walle.code.adapter.output.javax.persistence;
 
+import com.walle.code.adapter.output.row_mapper.RowMapper;
 import com.walle.code.domain.id.UserId;
 import com.walle.code.dto.row.StudentRow;
 import com.walle.code.port.output.FindStudentByUserIdOutputPort;
@@ -7,6 +8,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
 import java.util.Optional;
 
 /**
@@ -17,18 +19,22 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 public final class JavaxPersistenceFindStudentByUserIdOutputPortAdapter implements FindStudentByUserIdOutputPort {
-	public static final String QUERY = "select * from v_student where id_user = :userId";
+	public static final String QUERY = "select id, id_user from t_student where id_user = :userId";
 	public static final String PARAM_USER_ID = "userId";
 
 	@NonNull
 	private final EntityManager entityManager;
 
+	@NonNull
+	private final RowMapper<StudentRow> rowMapper;
+
 	@Override
 	public Optional<StudentRow> findStudentByUserId(UserId userId) {
-		return this.entityManager.createNamedQuery(QUERY, StudentRow.class)
+		return this.entityManager.createQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_USER_ID, userId.getValue())
 				.getResultList()
 				.stream()
-				.findFirst();
+				.findFirst()
+				.map(this.rowMapper::mapRow);
 	}
 }
