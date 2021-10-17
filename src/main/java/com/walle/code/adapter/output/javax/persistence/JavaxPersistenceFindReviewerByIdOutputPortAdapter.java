@@ -26,8 +26,10 @@ public final class JavaxPersistenceFindReviewerByIdOutputPortAdapter implements 
 
 	@NonNull
 	private final RowMapper<ReviewerRow> rowMapper;
+
 	@Override
-	public ReviewerRow findReviewerById(ReviewerId id) {
+	@NonNull
+	public ReviewerRow findReviewerById(@NonNull ReviewerId id) {
 		return this.entityManager.createQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_ID, id.getValue())
 				.getResultList()

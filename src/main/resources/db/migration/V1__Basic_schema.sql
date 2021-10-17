@@ -84,4 +84,13 @@ comment on column t_task.id is 'Идентификатор задачи';
 comment on column t_task.c_text is 'Код на языке программирования, специализированном в сеансе';
 comment on column t_task.c_review_text is 'Текст ревью';
 comment on column t_task.c_status is 'Статус задачи';
-comment on column t_task.id_session is 'Идентификатор сеанса, к которому относится данная посылка кода'
+comment on column t_task.id_session is 'Идентификатор сеанса, к которому относится данная посылка кода';
+
+create table if not exists t_admin(
+    id      serial primary key,
+    id_user int not null references t_user(id)
+);
+
+comment on table t_admin is 'Таблица администраторов wall-e бота';
+comment on column t_admin.id is 'Идентификатор администратора';
+comment on column t_admin.id_user is 'Идентификатор пользователя, связанного с администратором';

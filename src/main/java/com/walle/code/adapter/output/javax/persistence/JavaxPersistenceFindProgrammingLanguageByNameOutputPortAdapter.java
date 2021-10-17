@@ -19,7 +19,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public final class JavaxPersistenceFindProgrammingLanguageByNameOutputPortAdapter
 		implements FindProgrammingLanguageByNameOutputPort {
-	public static final String QUERY = "select id, c_name from t_programming_language where c_name like :programmingLanguageName";
+	public static final String QUERY = "select id, c_name from t_programming_language " +
+			"where c_name like :programmingLanguageName";
 	public static final String PARAM_PROGRAMMING_LANGUAGE_NAME = "programmingLanguageName";
 
 	@NonNull
@@ -29,7 +30,8 @@ public final class JavaxPersistenceFindProgrammingLanguageByNameOutputPortAdapte
 	private final RowMapper<ProgrammingLanguageRow> rowMapper;
 
 	@Override
-	public Optional<ProgrammingLanguageRow> findProgrammingLanguageByName(String programmingLanguageName) {
+	@NonNull
+	public Optional<ProgrammingLanguageRow> findProgrammingLanguageByName(@NonNull String programmingLanguageName) {
 		return this.entityManager.createQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_PROGRAMMING_LANGUAGE_NAME, programmingLanguageName)
 				.getResultList()

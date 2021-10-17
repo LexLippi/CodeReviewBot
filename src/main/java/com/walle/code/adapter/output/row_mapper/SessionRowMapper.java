@@ -7,6 +7,7 @@ import com.walle.code.domain.id.SessionId;
 import com.walle.code.domain.id.StudentId;
 import com.walle.code.dto.row.SessionRow;
 import com.walle.code.dto.status.SessionStatus;
+import lombok.NonNull;
 
 import javax.persistence.Tuple;
 
@@ -20,7 +21,8 @@ public enum SessionRowMapper implements RowMapper<SessionRow> {
 	public static final String PARAM_C_STATUS = "c_status";
 
 	@Override
-	public SessionRow mapRow(Tuple resultSet) {
+	@NonNull
+	public SessionRow mapRow(@NonNull Tuple resultSet) {
 		return SessionRow.of(SessionId.of(resultSet.get(PARAM_ID, Integer.class)),
 				ReviewerId.of(resultSet.get(PARAM_ID_REVIEWER, Integer.class)),
 				StudentId.of(resultSet.get(PARAM_ID_STUDENT, Integer.class)),

@@ -1,13 +1,15 @@
 package com.walle.code.adapter.output.row_mapper;
 
+import com.walle.code.domain.id.AdminId;
 import com.walle.code.domain.id.StudentId;
 import com.walle.code.domain.id.UserId;
+import com.walle.code.dto.row.AdminRow;
 import com.walle.code.dto.row.StudentRow;
 import lombok.NonNull;
 
 import javax.persistence.Tuple;
 
-public enum StudentRowMapper implements RowMapper<StudentRow> {
+public enum AdminRowMapper implements RowMapper<AdminRow> {
 	INSTANCE;
 
 	public static final String PARAM_ID = "id";
@@ -15,8 +17,8 @@ public enum StudentRowMapper implements RowMapper<StudentRow> {
 
 	@Override
 	@NonNull
-	public StudentRow mapRow(@NonNull Tuple resultSet) {
-		return StudentRow.of(StudentId.of(resultSet.get(PARAM_ID, Integer.class)),
+	public AdminRow mapRow(@NonNull Tuple resultSet) {
+		return AdminRow.of(AdminId.of(resultSet.get(PARAM_ID, Integer.class)),
 				UserId.of(resultSet.get(PARAM_ID_USER, Integer.class)));
 	}
 }

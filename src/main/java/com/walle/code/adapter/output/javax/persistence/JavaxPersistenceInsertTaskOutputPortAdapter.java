@@ -28,7 +28,8 @@ public final class JavaxPersistenceInsertTaskOutputPortAdapter implements Insert
 	private final EntityManager entityManager;
 
 	@Override
-	public TaskId insertTask(TaskRow task) {
+	@NonNull
+	public TaskId insertTask(@NonNull TaskRow task) {
 		return TaskId.of((Integer) this.entityManager.createNativeQuery(QUERY)
 				.setParameter(PARAM_TEXT, task.getText())
 				.setParameter(PARAM_SESSION_ID, task.getSessionId().getValue())

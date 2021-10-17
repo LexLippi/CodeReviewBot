@@ -4,6 +4,7 @@ import com.walle.code.domain.entity.Email;
 import com.walle.code.domain.id.DiscordUserId;
 import com.walle.code.domain.id.UserId;
 import com.walle.code.dto.row.UserRow;
+import lombok.NonNull;
 
 import javax.persistence.Tuple;
 
@@ -18,7 +19,8 @@ public enum UserRowMapper implements RowMapper<UserRow> {
 	public static final String PARAM_C_EMAIL  = "c_email";
 
 	@Override
-	public UserRow mapRow(Tuple resultSet) {
+	@NonNull
+	public UserRow mapRow(@NonNull Tuple resultSet) {
 		return UserRow.of(UserId.of(resultSet.get(PARAM_ID, Integer.class)),
 				DiscordUserId.of(resultSet.get(PARAM_ID_DISCORD, String.class)),
 				resultSet.get(PARAM_C_NICKNAME, String.class),

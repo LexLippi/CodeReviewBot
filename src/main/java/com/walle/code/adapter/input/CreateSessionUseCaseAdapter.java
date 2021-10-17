@@ -65,7 +65,7 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 														student.getId(),
 														programmingLanguage.getId())
 												.map(session -> {
-													this.sendMessageByDiscordIdOutputPort.sendMessageToReviewer(
+													this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
 															this.findUserByIdOutputPort.findUserById(
 																	this.findReviewerByIdOutputPort.findReviewerById(
 																			session.getReviewerId())

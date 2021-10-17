@@ -15,5 +15,5 @@ public interface SendMessageByDiscordIdOutputPort {
 	 * @param discordUserId идентификатор пользователя в Discord
 	 * @param message текстовое сообщение
 	 */
-	void sendMessageToReviewer(DiscordUserId discordUserId, String message);
+	void sendMessageByDiscordId(DiscordUserId discordUserId, String message);
 }

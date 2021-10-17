@@ -30,7 +30,8 @@ public final class JavaxPersistenceInsertSessionOutputPortAdapter implements Ins
 	private final EntityManager entityManager;
 
 	@Override
-	public SessionId insertSession(SessionRow session) {
+	@NonNull
+	public SessionId insertSession(@NonNull SessionRow session) {
 
 		return SessionId.of((Integer) this.entityManager.createNativeQuery(QUERY)
 				.setParameter(PARAM_REVIEWER_ID, session.getReviewerId().getValue())
