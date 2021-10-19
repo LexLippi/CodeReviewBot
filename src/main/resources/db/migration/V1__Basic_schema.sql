@@ -1,5 +1,3 @@
-create schema public;
-
 create table if not exists t_user (
     id           serial primary key,
     id_discord   text not null,

@@ -24,8 +24,8 @@ public final class DiscordMessageRouter extends ListenerAdapter {
 	public static final String BOT_ERROR_MESSAGE = "Sorry, we are not handle message from another bots";
 	public static final String INTERNAL_SERVER_ERROR_MESSAGE = "Oops. We fix this bug";
 
-	@NonNull
-	private final CreateSessionHandler createSessionHandler;
+//	@NonNull
+//	private final CreateSessionHandler createSessionHandler;
 
 	@NonNull
 	private final RegisterStudentHandler registerStudentHandler;
@@ -49,14 +49,14 @@ public final class DiscordMessageRouter extends ListenerAdapter {
 			 * @todo: и блок try-catch в случае непредвиденной ошибки сервера.
 			 * @todo: нарушается SRP (single-responsibility principle)
 			 */
-			if (event.getAuthor().isBot()) {
-				event.getChannel().sendMessage(BOT_ERROR_MESSAGE).queue();
-			}
+//			if (event.getAuthor().isBot()) {
+//				event.getChannel().sendMessage(BOT_ERROR_MESSAGE).queue();
+//			}
 
-			if (event.getMessage().getContentRaw().startsWith(CODE_PREFIX)) {
-				event.getChannel().sendMessage(this.createSessionHandler.handle(event)).queue();
-
-			}
+//			if (event.getMessage().getContentRaw().startsWith(CODE_PREFIX)) {
+//				event.getChannel().sendMessage(this.createSessionHandler.handle(event)).queue();
+//
+//			}
 
 			if (event.getMessage().getContentRaw().equalsIgnoreCase(REGISTER_COMMAND)) {
 				event.getChannel().sendMessage(this.registerStudentHandler.handle(event)).queue();

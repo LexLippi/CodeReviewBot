@@ -18,15 +18,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.support.TransactionOperations;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.security.auth.login.LoginException;
 
 @Configuration
 public class MainConfiguration {
     @Bean
     @Profile("discord")
-    public JDA jdaBuilder(@Value("${discord.bot.token}") String token,
+    public JDA jdaListener(@Value("${discord.bot.token}") String token,
                           @Qualifier("discordMessageListenerAdapter") ListenerAdapter
                                   discordMessageListenerAdapter) throws LoginException {
         return JDABuilder.createDefault(token)
@@ -36,38 +34,44 @@ public class MainConfiguration {
 
     @Bean
     @Profile("discord")
-    public ListenerAdapter discordMessageListenerAdapter(CreateSessionHandler createSessionHandler,
-                                                         RegisterStudentHandler registerStudentHandler,
+    public JDA jdaSender(@Value("${discord.bot.token}") String token) throws LoginException {
+        return JDABuilder.createDefault(token)
+                .build();
+    }
+
+    @Bean
+    @Profile("discord")
+    public ListenerAdapter discordMessageListenerAdapter(RegisterStudentHandler registerStudentHandler,
                                                          RegisterReviewerHandler registerReviewerHandler,
                                                          ApproveReviewerHandler approveReviewerHandler,
                                                          ReviewCodeHandler reviewCodeHandler) {
-        return new DiscordMessageRouter(createSessionHandler, registerStudentHandler, registerReviewerHandler,
+        return new DiscordMessageRouter(registerStudentHandler, registerReviewerHandler,
                 approveReviewerHandler, reviewCodeHandler);
     }
 
-    // @todo: add findReviewerOutputPort bean
-    @Bean
-    public CreateSessionHandler createSessionHandler(EntityManager entityManager,
-                                                     FindReviewerOutputPort findReviewerOutputPort,
-                                                     SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort,
-                                                     TransactionOperations transactionOperations,
-                                                     FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
-                                                     FindStudentByUserIdOutputPort findStudentByUserIdOutputPort) {
-        return new CreateSessionHandler(new CreateSessionUseCaseAdapter(
-                findUserByDiscordIdOutputPort,
-                findStudentByUserIdOutputPort,
-                new JavaxPersistenceFindProgrammingLanguageByNameOutputPortAdapter(entityManager,
-                        ProgrammingLanguageRowMapper.INSTANCE),
-                new JavaxPersistenceFindAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPortAdapter(
-                        entityManager, SessionRowMapper.INSTANCE),
-                findReviewerOutputPort,
-                new JavaxPersistenceFindReviewerByIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE),
-                new JavaxPersistenceFindUserByIdOutputPortAdapter(entityManager, UserRowMapper.INSTANCE),
-                new JavaxPersistenceInsertSessionOutputPortAdapter(entityManager),
-                new JavaxPersistenceInsertTaskOutputPortAdapter(entityManager),
-                sendMessageByDiscordIdOutputPort,
-                transactionOperations));
-    }
+//    // @todo: add findReviewerOutputPort bean
+//    @Bean
+//    public CreateSessionHandler createSessionHandler(EntityManager entityManager,
+//                                                     FindReviewerOutputPort findReviewerOutputPort,
+//                                                     SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort,
+//                                                     TransactionOperations transactionOperations,
+//                                                     FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
+//                                                     FindStudentByUserIdOutputPort findStudentByUserIdOutputPort) {
+//        return new CreateSessionHandler(new CreateSessionUseCaseAdapter(
+//                findUserByDiscordIdOutputPort,
+//                findStudentByUserIdOutputPort,
+//                new JavaxPersistenceFindProgrammingLanguageByNameOutputPortAdapter(entityManager,
+//                        ProgrammingLanguageRowMapper.INSTANCE),
+//                new JavaxPersistenceFindAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPortAdapter(
+//                        entityManager, SessionRowMapper.INSTANCE),
+//                findReviewerOutputPort,
+//                new JavaxPersistenceFindReviewerByIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE),
+//                new JavaxPersistenceFindUserByIdOutputPortAdapter(entityManager, UserRowMapper.INSTANCE),
+//                new JavaxPersistenceInsertSessionOutputPortAdapter(entityManager),
+//                new JavaxPersistenceInsertTaskOutputPortAdapter(entityManager),
+//                sendMessageByDiscordIdOutputPort,
+//                transactionOperations));
+//    }
 
     @Bean
     public ReviewCodeHandler reviewCodeHandler(FindUserByNicknameOutputPort findUserByNicknameOutputPort,
@@ -136,7 +140,7 @@ public class MainConfiguration {
     }
 
     @Bean
-    public SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort(JDA jda) {
+    public SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort(@Qualifier("jdaSender") JDA jda) {
         return new JdaSendMessageByDiscordIdOutputPortAdapter(jda);
     }
 
@@ -153,17 +157,5 @@ public class MainConfiguration {
     @Bean
     public FindStudentByUserIdOutputPort findStudentByUserIdOutputPort(EntityManager entityManager) {
         return new JavaxPersistenceFindStudentByUserIdOutputPortAdapter(entityManager, StudentRowMapper.INSTANCE);
-    }
-
-    @Bean
-    @Profile("database")
-    public EntityManagerFactory entityManagerFactory(@Value("${persistence.unit.name}") String persistenceUnitName) {
-        return Persistence.createEntityManagerFactory(persistenceUnitName);
-    }
-
-    @Bean
-    @Profile("database")
-    public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
-        return entityManagerFactory.createEntityManager();
     }
 }

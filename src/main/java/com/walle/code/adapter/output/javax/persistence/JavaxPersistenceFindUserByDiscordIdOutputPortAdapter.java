@@ -32,11 +32,11 @@ public final class JavaxPersistenceFindUserByDiscordIdOutputPortAdapter implemen
 	@Override
 	@NonNull
 	public Optional<UserRow> findUserByDiscordId(@NonNull DiscordUserId discordId) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_DISCORD_ID, discordId.getValue())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(result -> this.rowMapper.mapRow((Tuple) result));
 	}
 }
