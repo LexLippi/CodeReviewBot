@@ -9,6 +9,7 @@ import com.walle.code.port.input.CreateSessionUseCase;
 import com.walle.code.port.output.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.support.TransactionOperations;
 
 /**
  * Реализация {@link CreateSessionUseCase}.
@@ -28,7 +29,17 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 	private final FindProgrammingLanguageByNameOutputPort findProgrammingLanguageByNameOutputPort;
 
 	@NonNull
+	private final FindAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPort
+			findAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPort;
+
+	@NonNull
 	private final FindReviewerOutputPort findReviewerOutputPort;
+
+	@NonNull
+	private final FindReviewerByIdOutputPort findReviewerByIdOutputPort;
+
+	@NonNull
+	private final FindUserByIdOutputPort findUserByIdOutputPort;
 
 	@NonNull
 	private final InsertSessionOutputPort insertSessionOutputPort;
@@ -36,26 +47,54 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 	@NonNull
 	private final InsertTaskOutputPort insertTaskOutputPort;
 
+	@NonNull
+	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+
+	@NonNull
+	private final TransactionOperations transactionOperations;
+
 	@Override
+	@NonNull
 	public CreateSession.Result createSessionUseCase(@NonNull CreateSession command) {
 		return this.findUserByDiscordIdOutputPort.findUserByDiscordId(command.getDiscordUserId())
 				.map(user -> this.findStudentByUserIdOutputPort.findStudentByUserId(user.getId())
 						.map(student -> this.findProgrammingLanguageByNameOutputPort.findProgrammingLanguageByName(
 								command.getProgrammingLanguageName())
-								.map(programmingLanguage -> this.findReviewerOutputPort.findReviewer(programmingLanguage
-										.getId())
-										.map(reviewer -> CreateSession.Result.success(this.insertTaskOutputPort
-												.insertTask(TaskRow.of(null,
-														this.insertSessionOutputPort.insertSession(SessionRow.of(
-																null,
-																reviewer.getId(),
-																student.getId(),
-																programmingLanguage.getId(),
-																SessionStatus.REVIEW)),
-														command.getCodeText(),
-														null,
-														TaskStatus.CREATED))))
-										.orElse(CreateSession.Result.reviewerNotFound()))
+								.map(programmingLanguage -> this.transactionOperations.execute(transactionStatus ->
+										this.findAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPort
+												.findAdjustmentSessionByStudentIdAndProgrammingLanguageId(
+														student.getId(),
+														programmingLanguage.getId())
+												.map(session -> {
+													this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
+															this.findUserByIdOutputPort.findUserById(
+																	this.findReviewerByIdOutputPort.findReviewerById(
+																			session.getReviewerId())
+																			.getUserId())
+																	.getDiscordId(),
+															command.getCodeText());
+													return CreateSession.Result.success(this.insertTaskOutputPort
+															.insertTask(TaskRow.of(null,
+																	session.getId(),
+																	command.getCodeText(),
+																	null,
+																	TaskStatus.CREATED)));
+												})
+												.orElse(this.findReviewerOutputPort.findReviewer(programmingLanguage
+														.getId())
+														.map(reviewer -> CreateSession.Result.success(
+																this.insertTaskOutputPort.insertTask(TaskRow.of(
+																		null,
+																		this.insertSessionOutputPort.insertSession(
+																				SessionRow.of(null,
+																						reviewer.getId(),
+																						student.getId(),
+																						programmingLanguage.getId(),
+																						SessionStatus.REVIEW)),
+																		command.getCodeText(),
+																		null,
+																		TaskStatus.CREATED))))
+														.orElse(CreateSession.Result.reviewerNotFound()))))
 								.orElse(CreateSession.Result.programmingLanguageNotFound()))
 						.orElse(CreateSession.Result.studentNotFound()))
 				.orElse(CreateSession.Result.userNotFound());
