@@ -38,15 +38,16 @@ public final class JavaxPersistenceFindCreatedSessionByStudentIdAndReviewerIdOut
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public Optional<SessionRow> findReviewSessionByStudentIdAndReviewerId(@NonNull StudentId studentId,
 																		  @NonNull ReviewerId reviewerId) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_STUDENT_ID, studentId.getValue())
 				.setParameter(PARAM_REVIEWER_ID, reviewerId.getValue())
 				.setParameter(PARAM_STATUS, SessionStatus.REVIEW.getTag())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(result -> this.rowMapper.mapRow((Tuple) result));
 	}
 }

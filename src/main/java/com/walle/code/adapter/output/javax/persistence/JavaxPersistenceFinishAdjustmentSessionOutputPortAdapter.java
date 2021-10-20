@@ -24,6 +24,6 @@ public final class JavaxPersistenceFinishAdjustmentSessionOutputPortAdapter
 
 	@Override
 	public void finishAdjustmentSession(SessionId sessionId) {
-		this.entityManager.createQuery(QUERY).setParameter(PARAM_ID, sessionId.getValue()).executeUpdate();
+		this.entityManager.createNativeQuery(QUERY).setParameter(PARAM_ID, sessionId.getValue()).executeUpdate();
 	}
 }

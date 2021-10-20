@@ -32,12 +32,13 @@ public final class JavaxPersistenceFindReviewerByDiscordIdOutputPortAdapter
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public Optional<ReviewerRow> findReviewerByDiscordId(DiscordUserId discordUserId) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_DISCORD_ID, discordUserId.getValue())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(result -> this.rowMapper.mapRow((Tuple) result));
 	}
 }

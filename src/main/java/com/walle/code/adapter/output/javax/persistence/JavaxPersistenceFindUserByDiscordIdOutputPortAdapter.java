@@ -31,6 +31,7 @@ public final class JavaxPersistenceFindUserByDiscordIdOutputPortAdapter implemen
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public Optional<UserRow> findUserByDiscordId(@NonNull DiscordUserId discordId) {
 		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_DISCORD_ID, discordId.getValue())

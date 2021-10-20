@@ -30,12 +30,13 @@ public final class JavaxPersistenceFindUserByNicknameOutputPortAdapter implement
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public Optional<UserRow> findUserByNickname(@NonNull String nickname) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_NICKNAME, nickname)
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(result -> this.rowMapper.mapRow((Tuple) result));
 	}
 }

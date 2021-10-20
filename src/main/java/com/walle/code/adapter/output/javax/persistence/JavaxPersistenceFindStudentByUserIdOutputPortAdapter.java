@@ -30,12 +30,13 @@ public final class JavaxPersistenceFindStudentByUserIdOutputPortAdapter implemen
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public Optional<StudentRow> findStudentByUserId(@NonNull UserId userId) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_USER_ID, userId.getValue())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(result -> this.rowMapper.mapRow((Tuple) result));
 	}
 }

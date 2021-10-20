@@ -28,7 +28,7 @@ public final class JavaxPersistenceUpdateCreatedTaskBySessionIdOutputPortAdapter
 
 	@Override
 	public void updateAdjustmentTaskBySessionId(SessionId sessionId, String reviewText, TaskStatus taskStatus) {
-		this.entityManager.createQuery(QUERY)
+		this.entityManager.createNativeQuery(QUERY)
 				.setParameter(PARAM_SESSION_ID, sessionId.getValue())
 				.setParameter(PARAM_STATUS, taskStatus.getTag())
 				.setParameter(PARAM_TEXT, reviewText)
