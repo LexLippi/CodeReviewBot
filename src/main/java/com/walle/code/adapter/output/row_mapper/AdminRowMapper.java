@@ -1,10 +1,8 @@
 package com.walle.code.adapter.output.row_mapper;
 
 import com.walle.code.domain.id.AdminId;
-import com.walle.code.domain.id.StudentId;
 import com.walle.code.domain.id.UserId;
 import com.walle.code.dto.row.AdminRow;
-import com.walle.code.dto.row.StudentRow;
 import lombok.NonNull;
 
 import javax.persistence.Tuple;

@@ -54,6 +54,7 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 	private final TransactionOperations transactionOperations;
 
 	@Override
+	@NonNull
 	public CreateSession.Result createSessionUseCase(@NonNull CreateSession command) {
 		return this.findUserByDiscordIdOutputPort.findUserByDiscordId(command.getDiscordUserId())
 				.map(user -> this.findStudentByUserIdOutputPort.findStudentByUserId(user.getId())

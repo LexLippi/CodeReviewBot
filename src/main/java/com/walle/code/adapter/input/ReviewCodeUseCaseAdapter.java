@@ -42,7 +42,8 @@ public final class ReviewCodeUseCaseAdapter implements ReviewCodeUseCase {
 	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
 
 	@Override
-	public ReviewCode.Result reviewCode(ReviewCode command) {
+	@NonNull
+	public ReviewCode.Result reviewCode(@NonNull ReviewCode command) {
 		return this.findUserByNicknameOutputPort.findUserByNickname(command.getNickname())
 				.map(user -> this.findStudentByUserIdOutputPort.findStudentByUserId(user.getId())
 						.map(student -> this.findReviewerByDiscordIdOutputPort.findReviewerByDiscordId(

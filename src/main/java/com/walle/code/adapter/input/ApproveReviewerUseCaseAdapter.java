@@ -37,7 +37,8 @@ public final class ApproveReviewerUseCaseAdapter implements ApproveReviewerUseCa
 	private final TransactionOperations transactionOperations;
 
 	@Override
-	public ApproveReviewer.Result approveReviewer(ApproveReviewer command) {
+	@NonNull
+	public ApproveReviewer.Result approveReviewer(@NonNull ApproveReviewer command) {
 		return this.findAdminByDiscordUserIdOutputPort.findAdminByDiscordUserId(command.getDiscordUserId())
 				.map(admin -> this.findUserByNicknameOutputPort.findUserByNickname(command.getNickname())
 						.map(user -> {
