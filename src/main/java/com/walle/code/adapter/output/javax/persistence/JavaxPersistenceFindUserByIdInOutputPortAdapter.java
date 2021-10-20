@@ -35,16 +35,17 @@ public final class JavaxPersistenceFindUserByIdInOutputPortAdapter implements Fi
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public List<UserRow> findUserByIdIn(@NonNull Collection<UserId> ids) {
 		if (ids.isEmpty()) {
 			return List.of();
 		}
 
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return (List<UserRow>) this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_IDS, ids.stream().map(UserId::getValue).collect(toSet()))
 				.getResultList()
 				.stream()
-				.map(this.rowMapper::mapRow)
+				.map(result -> this.rowMapper.mapRow((Tuple) result))
 				.collect(toList());
 	}
 }

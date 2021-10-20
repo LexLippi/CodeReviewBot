@@ -30,13 +30,14 @@ public final class JavaxPersistenceFindUserByIdOutputPortAdapter implements Find
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public UserRow findUserById(@NonNull UserId id) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return (UserRow) this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_ID, id.getValue())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow)
+				.map(result -> this.rowMapper.mapRow((Tuple) result))
 				.orElseThrow();
 	}
 }

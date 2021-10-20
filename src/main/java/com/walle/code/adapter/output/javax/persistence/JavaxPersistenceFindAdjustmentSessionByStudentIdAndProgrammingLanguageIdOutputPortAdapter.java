@@ -38,15 +38,16 @@ public final class JavaxPersistenceFindAdjustmentSessionByStudentIdAndProgrammin
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public Optional<SessionRow> findAdjustmentSessionByStudentIdAndProgrammingLanguageId(
 			@NonNull StudentId studentId, @NonNull ProgrammingLanguageId programmingLanguageId) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_STUDENT_ID, studentId.getValue())
 				.setParameter(PARAM_PROGRAMMING_LANGUAGE_ID, programmingLanguageId.getValue())
 				.setParameter(PARAM_STATUS, SessionStatus.ADJUSTMENT.getTag())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(result -> this.rowMapper.mapRow((Tuple) result));
 	}
 }

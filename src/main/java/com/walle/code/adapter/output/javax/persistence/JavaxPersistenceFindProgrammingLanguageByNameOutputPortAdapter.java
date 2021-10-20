@@ -31,12 +31,13 @@ public final class JavaxPersistenceFindProgrammingLanguageByNameOutputPortAdapte
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public Optional<ProgrammingLanguageRow> findProgrammingLanguageByName(@NonNull String programmingLanguageName) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_PROGRAMMING_LANGUAGE_NAME, programmingLanguageName)
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(result -> this.rowMapper.mapRow((Tuple) result));
 	}
 }

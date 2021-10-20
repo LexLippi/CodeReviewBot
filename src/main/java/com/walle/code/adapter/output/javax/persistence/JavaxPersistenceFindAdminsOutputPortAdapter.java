@@ -30,11 +30,12 @@ public final class JavaxPersistenceFindAdminsOutputPortAdapter implements FindAd
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public List<AdminRow> findAdmins() {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return (List<AdminRow>) this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.getResultList()
 				.stream()
-				.map(this.rowMapper::mapRow)
+				.map(result -> this.rowMapper.mapRow((Tuple) result))
 				.collect(toList());
 	}
 }

@@ -30,12 +30,13 @@ public final class JavaxPersistenceFindReviewerByUserIdOutputPortAdapter impleme
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public Optional<ReviewerRow> findReviewerByUserId(@NonNull UserId userId) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_USER_ID, userId.getValue())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow);
+				.map(result -> this.rowMapper.mapRow((Tuple) result));
 	}
 }

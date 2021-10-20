@@ -29,13 +29,14 @@ public final class JavaxPersistenceFindReviewerByIdOutputPortAdapter implements 
 
 	@Override
 	@NonNull
+	@SuppressWarnings("unchecked")
 	public ReviewerRow findReviewerById(@NonNull ReviewerId id) {
-		return this.entityManager.createQuery(QUERY, Tuple.class)
+		return (ReviewerRow) this.entityManager.createNativeQuery(QUERY, Tuple.class)
 				.setParameter(PARAM_ID, id.getValue())
 				.getResultList()
 				.stream()
 				.findFirst()
-				.map(this.rowMapper::mapRow)
+				.map(result -> this.rowMapper.mapRow((Tuple) result))
 				.orElseThrow();
 	}
 }
