@@ -21,8 +21,8 @@ public final class JdaSendMessageByDiscordIdOutputPortAdapter implements SendMes
 
 	@Override
 	public void sendMessageByDiscordId(@NonNull DiscordUserId discordUserId, @NonNull String message) {
-		Objects.requireNonNull(this.jda.getUserById(discordUserId.getValue()))
-				.openPrivateChannel()
-				.queue(privateChannel -> privateChannel.sendMessage(message).queue());
+		this.jda.retrieveUserById(discordUserId.getValue())
+				.queue(user -> user.openPrivateChannel()
+						.queue(privateChannel -> privateChannel.sendMessage(message).queue()));
 	}
 }

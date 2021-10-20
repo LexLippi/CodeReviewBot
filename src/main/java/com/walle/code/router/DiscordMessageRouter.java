@@ -49,9 +49,9 @@ public final class DiscordMessageRouter extends ListenerAdapter {
 			 * @todo: и блок try-catch в случае непредвиденной ошибки сервера.
 			 * @todo: нарушается SRP (single-responsibility principle)
 			 */
-//			if (event.getAuthor().isBot()) {
-//				event.getChannel().sendMessage(BOT_ERROR_MESSAGE).queue();
-//			}
+			if (event.getAuthor().isBot()) {
+				return;
+			}
 
 //			if (event.getMessage().getContentRaw().startsWith(CODE_PREFIX)) {
 //				event.getChannel().sendMessage(this.createSessionHandler.handle(event)).queue();
