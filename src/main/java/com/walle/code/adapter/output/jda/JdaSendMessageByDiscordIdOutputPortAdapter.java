@@ -6,8 +6,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 
-import java.util.Objects;
-
 /**
  * Реализация {@link SendMessageByDiscordIdOutputPort} с использованием JDA.
  *
