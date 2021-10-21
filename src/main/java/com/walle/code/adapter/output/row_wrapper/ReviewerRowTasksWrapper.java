@@ -17,13 +17,13 @@ import javax.persistence.EntityManager;
 public enum ReviewerRowTasksWrapper implements RowWrapper<ReviewerRow, ReviewerRowWrap<Integer>> {
     INSTANCE;
     public static final String QUERY = "select count(*) from t_session " +
-            "where id_reviewer like :reviewerID and c_status = 0"; // fix if i wrong
+            "where id_reviewer = :reviewerID and c_status in ('r', 'a')";
     public static final String PARAM_REVIEWER_ID = "reviewerID";
 
     @Override
     @NonNull
     public ReviewerRowWrap<Integer> wrapRow(ReviewerRow resultSet, EntityManager entityManager) {
-        return ReviewerRowWrap.of(entityManager.createNamedQuery(QUERY, Integer.class)
+        return ReviewerRowWrap.of((Integer)entityManager.createNativeQuery(QUERY, Integer.class)
                 .setParameter(PARAM_REVIEWER_ID, resultSet.getId())
                 .getResultList()
                 .stream()

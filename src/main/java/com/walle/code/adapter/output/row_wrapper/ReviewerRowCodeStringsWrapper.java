@@ -19,18 +19,18 @@ public enum ReviewerRowCodeStringsWrapper implements RowWrapper<ReviewerRow, Rev
     INSTANCE;
 
     public static final String QUERY = "select c_text from t_session ts inner join t_task tt" +
-            "on ts.id=tt.id_session where ts.id_reviewer like :reviewerID and tt.c_status = 0"; // fix if i wrong
+            "on ts.id=tt.id_session where ts.id_reviewer = :reviewerID and tt.c_status = 'c'"; // fix if i wrong
     public static final String PARAM_REVIEWER_ID = "reviewerID";
 
     @Override
     @NonNull
     public ReviewerRowWrap<Integer> wrapRow(ReviewerRow resultSet, EntityManager entityManager) {
-        return ReviewerRowWrap.of(entityManager.createNamedQuery(QUERY, String.class)
-                .setParameter(PARAM_REVIEWER_ID, resultSet.getId())
+        return ReviewerRowWrap.of(entityManager.createNativeQuery(QUERY, String.class)
+                .setParameter(PARAM_REVIEWER_ID, resultSet.getId().getValue())
                 .getResultList()
                 .stream()
-                .map(r -> r.chars().filter(c -> c == '\n').count())
-                .mapToInt(r -> r.intValue())
+                .map(r -> ((String)r).chars().filter(c -> c == '\n').count())
+                .mapToInt(r -> ((Integer)r).intValue())
                 .sum(), resultSet);
     }
 }

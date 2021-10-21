@@ -27,8 +27,9 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public class JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAdapter implements FindReviewerOutputPort {
-    public static final String QUERY = "select id_reviewer from t_reviewer_programming_language " +
-            "where id_programming_language like :programmingLanguageID";
+    public static final String QUERY = "select trp.id_reviewer, tr.id_user from t_reviewer_programming_language trp " +
+            "inner join t_reviewer tr on trp.id_reviewer = tr.id" +
+            "where trp.id_programming_language = :programmingLanguageID";
     public static final String PARAM_PROGRAMMING_LANGUAGE_ID = "programmingLanguageID";
 
     @NonNull
@@ -45,13 +46,12 @@ public class JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAdapter 
 
     @Override
     public Optional<ReviewerRow> findReviewer(@NotNull ProgrammingLanguageId programmingLanguageId) {
-        return this.entityManager.createNamedQuery(QUERY, Tuple.class)
+        return this.entityManager.createNativeQuery(QUERY, Tuple.class)
                 .setParameter(PARAM_PROGRAMMING_LANGUAGE_ID, programmingLanguageId.getValue())
                 .getResultList()
                 .stream()
                 .map(result -> this.rowWrapper.wrapRow(this.rowMapper.mapRow((Tuple) result), entityManager))
                 .sorted(reviewerRowComparator)
-                .map(result -> result.reviewerRow)
                 .findFirst();
     }
 }
