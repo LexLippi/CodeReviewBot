@@ -17,23 +17,20 @@ import javax.persistence.EntityManager;
 
 public enum ReviewerRowCodeStringsWrapper implements RowWrapper<ReviewerRow, ReviewerRowWrap<Integer>>{
     INSTANCE;
-    /** @todo:
-     * нужно (как я понимаю) получить набор всех тасков из t_session
-     * Где наш ревьюер в роли ревьюера и статус в процессе
-     * Потом объединить по id_session с t_task
-     * А затем подсчитать количество строк кода
-     */
-    public static final String QUERY = ""; // fix if i wrong
-    public static final String PARAM_REVIEWER_ID = "programmingLanguageID";
+
+    public static final String QUERY = "select c_text from t_session ts inner join t_task tt" +
+            "on ts.id=tt.id_session where ts.id_reviewer like :reviewerID and tt.c_status = 0"; // fix if i wrong
+    public static final String PARAM_REVIEWER_ID = "reviewerID";
 
     @Override
     @NonNull
     public ReviewerRowWrap<Integer> wrapRow(ReviewerRow resultSet, EntityManager entityManager) {
-        return ReviewerRowWrap.of(entityManager.createNamedQuery(QUERY, Integer.class)
+        return ReviewerRowWrap.of(entityManager.createNamedQuery(QUERY, String.class)
                 .setParameter(PARAM_REVIEWER_ID, resultSet.getId())
                 .getResultList()
                 .stream()
-                .findFirst()
-                .get(), resultSet);
+                .map(r -> r.chars().filter(c -> c == '\n').count())
+                .mapToInt(r -> r.intValue())
+                .sum(), resultSet);
     }
 }
