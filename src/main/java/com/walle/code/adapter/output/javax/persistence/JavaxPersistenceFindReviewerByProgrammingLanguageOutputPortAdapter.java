@@ -1,11 +1,9 @@
 package com.walle.code.adapter.output.javax.persistence;
 
-import com.walle.code.adapter.output.row_mapper.ReviewerRowMapper;
 import com.walle.code.adapter.output.row_mapper.RowMapper;
 import com.walle.code.adapter.output.row_wrapper.RowWrapper;
 import com.walle.code.domain.id.ProgrammingLanguageId;
 import com.walle.code.dto.row.ReviewerRow;
-import com.walle.code.port.output.FindProgrammingLanguageByNameOutputPort;
 import com.walle.code.port.output.FindReviewerOutputPort;
 import com.walle.code.wraps.ReviewerRowWrap;
 import lombok.NonNull;
@@ -14,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
-import java.awt.image.renderable.RenderableImage;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -51,7 +48,7 @@ public class JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAdapter 
                 .getResultList()
                 .stream()
                 .map(result -> this.rowWrapper.wrapRow(this.rowMapper.mapRow((Tuple) result), entityManager))
-                .sorted(reviewerRowComparator)
-                .findFirst();
+                .min(reviewerRowComparator)
+                .map(result -> ((ReviewerRowWrap<Integer>)result).reviewerRow);
     }
 }
