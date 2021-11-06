@@ -1,15 +1,16 @@
 package com.walle.code.adapter.input;
 
 import com.walle.code.command.ApproveReviewer;
+import com.walle.code.dto.row.ReviewerProgrammingLanguageRow;
 import com.walle.code.dto.row.ReviewerRow;
 import com.walle.code.port.input.ApproveReviewerUseCase;
-import com.walle.code.port.output.FindAdminByDiscordUserIdOutputPort;
-import com.walle.code.port.output.FindUserByNicknameOutputPort;
-import com.walle.code.port.output.InsertReviewerOutputPort;
-import com.walle.code.port.output.SendMessageByDiscordIdOutputPort;
+import com.walle.code.port.output.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.support.TransactionOperations;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Реализация {@link ApproveReviewerUseCase}.
@@ -20,7 +21,7 @@ import org.springframework.transaction.support.TransactionOperations;
 @RequiredArgsConstructor
 public final class ApproveReviewerUseCaseAdapter implements ApproveReviewerUseCase {
 	public static final String YOU_SUCCESSFULLY_ADDED_TO_REVIEWERS = "You successfully added to reviewers group";
-
+	public static final String ERROR_NAME = "Programming language with this name doesn't exist";
 	@NonNull
 	private final FindAdminByDiscordUserIdOutputPort findAdminByDiscordUserIdOutputPort;
 
@@ -29,6 +30,12 @@ public final class ApproveReviewerUseCaseAdapter implements ApproveReviewerUseCa
 
 	@NonNull
 	private final InsertReviewerOutputPort insertReviewerOutputPort;
+
+	@NonNull
+	private final InsertReviewerProgrammingLanguageOutputPort insertReviewerProgrammingLanguageOutputPort;
+
+	@NonNull
+	private final FindProgrammingLanguageByNameOutputPort findProgrammingLanguageByNameOutputPort;
 
 	@NonNull
 	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
@@ -42,10 +49,22 @@ public final class ApproveReviewerUseCaseAdapter implements ApproveReviewerUseCa
 		return this.findAdminByDiscordUserIdOutputPort.findAdminByDiscordUserId(command.getDiscordUserId())
 				.map(admin -> this.findUserByNicknameOutputPort.findUserByNickname(command.getNickname())
 						.map(user -> {
-							this.transactionOperations.executeWithoutResult(status -> this.insertReviewerOutputPort
-									.insertReviewer(ReviewerRow.of(
-											null,
-											user.getId())));
+							this.transactionOperations.executeWithoutResult(status -> {
+								var reviewerId = this.insertReviewerOutputPort.insertReviewer(ReviewerRow.of(
+										null, user.getId()));
+								Arrays.stream(command.getProgrammingLanguages())
+										.forEach(programmingLanguageName -> this.findProgrammingLanguageByNameOutputPort
+												.findProgrammingLanguageByName(programmingLanguageName)
+												.ifPresentOrElse(programmingLanguage ->
+														this.insertReviewerProgrammingLanguageOutputPort
+																.insertReviewerProgrammingLanguage(
+																		ReviewerProgrammingLanguageRow.of(null,
+																				reviewerId,
+																				programmingLanguage.getId())),
+														() -> this.sendMessageByDiscordIdOutputPort
+																.sendMessageByDiscordId(command.getDiscordUserId(),
+																		ERROR_NAME)));
+							});
 							this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(user.getDiscordId(),
 									YOU_SUCCESSFULLY_ADDED_TO_REVIEWERS);
 							return ApproveReviewer.Result.success(user.getNickname());

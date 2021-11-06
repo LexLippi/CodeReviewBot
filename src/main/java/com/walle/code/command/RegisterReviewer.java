@@ -5,6 +5,7 @@ import com.walle.code.domain.id.ReviewerId;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Класс-команда с информацией для регистрации ревьюера.
@@ -18,19 +19,23 @@ import java.time.Instant;
 public final class RegisterReviewer extends Command {
 	private final String nickname;
 
-	public static RegisterReviewer of(@NonNull DiscordUserId discordUserId, @NonNull String nickname) {
-		return of(Instant.now(), discordUserId, nickname);
+	private final List<String> programmingLanguages;
+
+	public static RegisterReviewer of(@NonNull DiscordUserId discordUserId, @NonNull String nickname,
+									  @NonNull List<String> programmingLanguages) {
+		return of(Instant.now(), discordUserId, nickname, programmingLanguages);
 	}
 
 	public static RegisterReviewer of(@NonNull Instant timestamp, @NonNull DiscordUserId discordUserId,
-									  @NonNull String nickname) {
-		return new RegisterReviewer(timestamp, discordUserId, nickname);
+									  @NonNull String nickname, @NonNull List<String> programmingLanguages) {
+		return new RegisterReviewer(timestamp, discordUserId, nickname, programmingLanguages);
 	}
 
 	private RegisterReviewer(@NonNull Instant timestamp, @NonNull DiscordUserId discordUserId,
-							 @NonNull String nickname) {
+							 @NonNull String nickname, @NonNull List<String> programmingLanguages) {
 		super(timestamp, discordUserId);
 		this.nickname = nickname;
+		this.programmingLanguages = programmingLanguages;
 	}
 
 	public interface Result {

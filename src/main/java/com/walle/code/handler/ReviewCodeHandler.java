@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.Arrays;
 
+import static java.util.stream.Collectors.joining;
+
 /**
  * Компонент для обработки сохранения результатов код-ревью
  *
@@ -27,12 +29,16 @@ public final class ReviewCodeHandler {
 	@NonNull
 	public String handle(@NonNull MessageReceivedEvent event) {
 		var lines = event.getMessage().getContentRaw().split(LINE_BREAK);
-		var header = lines[0].split(SPACE);
+
+		if (lines.length < 2) {
+			throw new IllegalArgumentException();
+		}
+
 		return this.reviewCodeUseCase.reviewCode(ReviewCode.of(
 				DiscordUserId.of(event.getAuthor().getId()),
-				header[1],
-				TaskStatus.fromTag(header[2]),
-				String.join(LINE_BREAK, Arrays.stream(lines).skip(1).toArray(String[]::new))))
+				Arrays.stream(lines[0].split(SPACE)).skip(1).collect(joining(SPACE)),
+				TaskStatus.fromTag(lines[1]),
+				String.join(LINE_BREAK, Arrays.stream(lines).skip(2).toArray(String[]::new))))
 				.mapWith(ReviewCodeResultToStringMapper.INSTANCE);
 	}
 

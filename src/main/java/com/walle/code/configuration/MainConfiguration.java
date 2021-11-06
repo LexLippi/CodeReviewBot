@@ -4,9 +4,12 @@ import com.walle.code.adapter.input.*;
 import com.walle.code.adapter.output.javax.persistence.*;
 import com.walle.code.adapter.output.jda.JdaSendMessageByDiscordIdOutputPortAdapter;
 import com.walle.code.adapter.output.row_mapper.*;
+import com.walle.code.adapter.output.row_wrapper.ReviewerRowTasksWrapper;
+import com.walle.code.comparators.ReviewerRowWrapValueIncreaseComparator;
 import com.walle.code.handler.*;
 import com.walle.code.port.output.*;
-import com.walle.code.router.DiscordMessageRouter;
+import com.walle.code.listener.DiscordMessageListener;
+import com.walle.code.router.EventRouterAdapter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -41,37 +44,40 @@ public class MainConfiguration {
 
     @Bean
     @Profile("discord")
-    public ListenerAdapter discordMessageListenerAdapter(RegisterStudentHandler registerStudentHandler,
+    public ListenerAdapter discordMessageListenerAdapter(CreateSessionHandler createSessionHandler,
+                                                         RegisterStudentHandler registerStudentHandler,
                                                          RegisterReviewerHandler registerReviewerHandler,
                                                          ApproveReviewerHandler approveReviewerHandler,
                                                          ReviewCodeHandler reviewCodeHandler) {
-        return new DiscordMessageRouter(registerStudentHandler, registerReviewerHandler,
-                approveReviewerHandler, reviewCodeHandler);
+        return new DiscordMessageListener(new EventRouterAdapter(createSessionHandler, registerStudentHandler,
+                registerReviewerHandler, approveReviewerHandler, reviewCodeHandler));
     }
 
-//    // @todo: add findReviewerOutputPort bean
-//    @Bean
-//    public CreateSessionHandler createSessionHandler(EntityManager entityManager,
-//                                                     FindReviewerOutputPort findReviewerOutputPort,
-//                                                     SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort,
-//                                                     TransactionOperations transactionOperations,
-//                                                     FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
-//                                                     FindStudentByUserIdOutputPort findStudentByUserIdOutputPort) {
-//        return new CreateSessionHandler(new CreateSessionUseCaseAdapter(
-//                findUserByDiscordIdOutputPort,
-//                findStudentByUserIdOutputPort,
-//                new JavaxPersistenceFindProgrammingLanguageByNameOutputPortAdapter(entityManager,
-//                        ProgrammingLanguageRowMapper.INSTANCE),
-//                new JavaxPersistenceFindAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPortAdapter(
-//                        entityManager, SessionRowMapper.INSTANCE),
-//                findReviewerOutputPort,
-//                new JavaxPersistenceFindReviewerByIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE),
-//                new JavaxPersistenceFindUserByIdOutputPortAdapter(entityManager, UserRowMapper.INSTANCE),
-//                new JavaxPersistenceInsertSessionOutputPortAdapter(entityManager),
-//                new JavaxPersistenceInsertTaskOutputPortAdapter(entityManager),
-//                sendMessageByDiscordIdOutputPort,
-//                transactionOperations));
-//    }
+    @Bean
+    public CreateSessionHandler createSessionHandler(EntityManager entityManager,
+                                                     SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort,
+                                                     TransactionOperations transactionOperations,
+                                                     FindProgrammingLanguageByNameOutputPort
+                                                                 findProgrammingLanguageByNameOutputPort,
+                                                     FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
+                                                     FindStudentByUserIdOutputPort findStudentByUserIdOutputPort) {
+        return new CreateSessionHandler(new CreateSessionUseCaseAdapter(
+                findUserByDiscordIdOutputPort,
+                findStudentByUserIdOutputPort,
+                findProgrammingLanguageByNameOutputPort,
+                new JavaxPersistenceFindAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPortAdapter(
+                        entityManager, SessionRowMapper.INSTANCE),
+                new JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAdapter(entityManager,
+                        ReviewerRowWrapValueIncreaseComparator.INSTANCE,
+                        ReviewerRowTasksWrapper.INSTANCE,
+                        ReviewerRowMapper.INSTANCE),
+                new JavaxPersistenceFindReviewerByIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE),
+                new JavaxPersistenceFindUserByIdOutputPortAdapter(entityManager, UserRowMapper.INSTANCE),
+                new JavaxPersistenceInsertSessionOutputPortAdapter(entityManager),
+                new JavaxPersistenceInsertTaskOutputPortAdapter(entityManager),
+                sendMessageByDiscordIdOutputPort,
+                transactionOperations));
+    }
 
     @Bean
     public ReviewCodeHandler reviewCodeHandler(FindUserByNicknameOutputPort findUserByNicknameOutputPort,
@@ -101,11 +107,15 @@ public class MainConfiguration {
                                                          SendMessageByDiscordIdOutputPort
                                                                  sendMessageByDiscordIdOutputPort,
                                                          FindUserByNicknameOutputPort findUserByNicknameOutputPort,
+                                                         FindProgrammingLanguageByNameOutputPort
+                                                                     findProgrammingLanguageByNameOutputPort,
                                                          TransactionOperations transactionOperations) {
         return new ApproveReviewerHandler(new ApproveReviewerUseCaseAdapter(
                 new JavaxPersistenceFindAdminByDiscordUserIdOutputPortAdapter(entityManager, AdminRowMapper.INSTANCE),
                 findUserByNicknameOutputPort,
                 new JavaxPersistenceInsertReviewerOutputPortAdapter(entityManager),
+                new JavaxPersistenceInsertReviewerProgrammingLanguageOutputPortAdapter(entityManager),
+                findProgrammingLanguageByNameOutputPort,
                 sendMessageByDiscordIdOutputPort,
                 transactionOperations));
     }
@@ -137,6 +147,13 @@ public class MainConfiguration {
                 new JavaxPersistenceInsertStudentOutputPortAdapter(entityManager),
                 insertUserOutputPort,
                 transactionOperations));
+    }
+
+    @Bean
+    public FindProgrammingLanguageByNameOutputPort findProgrammingLanguageByNameOutputPort(EntityManager
+                                                                                                       entityManager) {
+        return new JavaxPersistenceFindProgrammingLanguageByNameOutputPortAdapter(entityManager,
+                ProgrammingLanguageRowMapper.INSTANCE);
     }
 
     @Bean

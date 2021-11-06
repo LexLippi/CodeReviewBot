@@ -2,15 +2,12 @@ package com.walle.code.adapter.input;
 
 import com.walle.code.command.RegisterReviewer;
 import com.walle.code.dto.row.AdminRow;
-import com.walle.code.dto.row.StudentRow;
 import com.walle.code.dto.row.UserRow;
 import com.walle.code.port.input.RegisterReviewerUseCase;
 import com.walle.code.port.output.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.support.TransactionOperations;
-
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -23,7 +20,8 @@ import static java.util.stream.Collectors.toSet;
 @RequiredArgsConstructor
 public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUseCase {
 	public static final String THIS_USER = "This user ";
-	public static final String WANT_TO_BE_REVIEWER = " want to be reviewer. Please, connect with him";
+	public static final String WANT_TO_BE_REVIEWER = " want to be reviewer. With next programming languages: ";
+	public static final String PLEASE_CONNECT = "Please, connect with him!";
 
 	@NonNull
 	private final FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort;
@@ -59,7 +57,8 @@ public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUse
 									.collect(toSet()))
 									.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
 											adminUser.getDiscordId(),
-											 THIS_USER + command.getNickname() + WANT_TO_BE_REVIEWER));
+											 THIS_USER + command.getNickname() + WANT_TO_BE_REVIEWER +
+													 command.getProgrammingLanguages() + PLEASE_CONNECT));
 							return RegisterReviewer.Result.success();
 						}))
 				.orElseGet(() -> {
