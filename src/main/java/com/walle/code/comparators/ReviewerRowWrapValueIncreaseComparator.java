@@ -10,15 +10,11 @@ import java.util.Comparator;
  * @author <a href="mailto:aleksey.bykov.01@mail.ru">Алексей Быков</a>.
  * @since 21.1.0
  */
-
-public class ReviewerRowWrapValueIncreaseComparator implements Comparator<ReviewerRowWrap<Integer>> {
+public enum ReviewerRowWrapValueIncreaseComparator implements Comparator<ReviewerRowWrap<Integer>> {
+    INSTANCE;
 
     @Override
     public int compare(ReviewerRowWrap<Integer> o1, ReviewerRowWrap<Integer> o2) {
-        if (o1.getWrap_value() < o2.getWrap_value())
-            return -1;
-        if (o1.getWrap_value() == o2.getWrap_value())
-            return 0;
-        return 1;
+        return o1.getWrap_value().compareTo(o2.getWrap_value());
     }
 }

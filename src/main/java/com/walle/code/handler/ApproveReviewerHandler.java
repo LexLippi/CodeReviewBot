@@ -7,6 +7,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+import java.util.Arrays;
+
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 /**
  * Компонент для подтверждения регистрации ревьюера.
  *
@@ -22,10 +27,14 @@ public final class ApproveReviewerHandler {
 
 	@NonNull
 	public String handle(@NonNull MessageReceivedEvent event) {
-
+		var lines = event.getMessage().getContentRaw().lines().collect(toList());
+		if (lines.size() < 2) {
+			throw new IllegalArgumentException();
+		}
 		return this.approveReviewerUseCase.approveReviewer(ApproveReviewer.of(
 				DiscordUserId.of(event.getAuthor().getId()),
-				event.getMessage().getContentRaw().split(SPACE)[1]))
+				Arrays.stream(lines.get(0).split(SPACE)).skip(1).collect(joining(SPACE)),
+				lines.get(1).split(SPACE)))
 				.mapWith(ApproveReviewerResultToStringMapper.INSTANCE);
 	}
 

@@ -17,18 +17,23 @@ import java.time.Instant;
 public final class ApproveReviewer extends Command {
 	private final String nickname;
 
-	public static ApproveReviewer of(@NonNull DiscordUserId discordUserId, @NonNull String nickname) {
-		return of(Instant.now(), discordUserId, nickname);
+	private final String[] programmingLanguages;
+
+	public static ApproveReviewer of(@NonNull DiscordUserId discordUserId, @NonNull String nickname,
+									 @NonNull String[] programmingLanguages) {
+		return of(Instant.now(), discordUserId, nickname, programmingLanguages);
 	}
 
 	public static ApproveReviewer of(@NonNull Instant timestamp, @NonNull DiscordUserId discordUserId,
-									 @NonNull String nickname) {
-		return new ApproveReviewer(timestamp, discordUserId, nickname);
+									 @NonNull String nickname, @NonNull String[] programmingLanguages) {
+		return new ApproveReviewer(timestamp, discordUserId, nickname, programmingLanguages);
 	}
 
-	public ApproveReviewer(@NonNull Instant timestamp, @NonNull DiscordUserId discordUserId, @NonNull String nickname) {
+	public ApproveReviewer(@NonNull Instant timestamp, @NonNull DiscordUserId discordUserId, @NonNull String nickname,
+						   @NonNull String[] programmingLanguages) {
 		super(timestamp, discordUserId);
 		this.nickname = nickname;
+		this.programmingLanguages = programmingLanguages;
 	}
 
 	public interface Result {

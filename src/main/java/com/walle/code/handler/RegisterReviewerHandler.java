@@ -9,6 +9,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+import java.util.Arrays;
+
+import static java.util.stream.Collectors.toList;
+
 /**
  * Компонент для обработки регистрации пользователя.
  *
@@ -17,6 +21,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
  */
 @RequiredArgsConstructor
 public final class RegisterReviewerHandler {
+	public static final String SPACE = " ";
 
 	@NonNull
 	private final RegisterReviewerUseCase registerReviewerUseCase;
@@ -25,7 +30,8 @@ public final class RegisterReviewerHandler {
 	public String handle(@NonNull MessageReceivedEvent event) {
 		return this.registerReviewerUseCase.registerReviewer(RegisterReviewer.of(
 				DiscordUserId.of(event.getAuthor().getId()),
-				event.getAuthor().getName()))
+				event.getAuthor().getName(),
+				Arrays.stream(event.getMessage().getContentRaw().split(SPACE)).skip(1).collect(toList())))
 				.mapWith(RegisterUserResultToStringMapper.INSTANCE);
 	}
 
