@@ -26,7 +26,7 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 	private final FindStudentByUserIdOutputPort findStudentByUserIdOutputPort;
 
 	@NonNull
-	private final FindProgrammingLanguageByNameOutputPort findProgrammingLanguageByNameOutputPort;
+	private final FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByAliasOutputPort;
 
 	@NonNull
 	private final FindAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPort
@@ -58,7 +58,7 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 	public CreateSession.Result createSessionUseCase(@NonNull CreateSession command) {
 		return this.findUserByDiscordIdOutputPort.findUserByDiscordId(command.getDiscordUserId())
 				.map(user -> this.findStudentByUserIdOutputPort.findStudentByUserId(user.getId())
-						.map(student -> this.findProgrammingLanguageByNameOutputPort.findProgrammingLanguageByName(
+						.map(student -> this.findProgrammingLanguageByAliasOutputPort.findProgrammingLanguageByAlias(
 								command.getProgrammingLanguageName())
 								.map(programmingLanguage -> this.transactionOperations.execute(transactionStatus ->
 										this.findAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPort

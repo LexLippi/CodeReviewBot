@@ -1,18 +1,20 @@
 package com.walle.code.configuration;
 
 import com.walle.code.adapter.input.*;
+import com.walle.code.adapter.output.javax.mail.JavaxMailIsEmailCorrectOutputPort;
 import com.walle.code.adapter.output.javax.persistence.*;
 import com.walle.code.adapter.output.jda.JdaSendMessageByDiscordIdOutputPortAdapter;
 import com.walle.code.adapter.output.row_mapper.*;
 import com.walle.code.adapter.output.row_wrapper.ReviewerRowTasksWrapper;
 import com.walle.code.comparators.ReviewerRowWrapValueIncreaseComparator;
 import com.walle.code.handler.*;
-import com.walle.code.port.output.*;
 import com.walle.code.listener.DiscordMessageListener;
+import com.walle.code.port.output.*;
 import com.walle.code.router.EventRouterAdapter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -44,27 +46,101 @@ public class MainConfiguration {
 
     @Bean
     @Profile("discord")
-    public ListenerAdapter discordMessageListenerAdapter(CreateSessionHandler createSessionHandler,
-                                                         RegisterStudentHandler registerStudentHandler,
-                                                         RegisterReviewerHandler registerReviewerHandler,
-                                                         ApproveReviewerHandler approveReviewerHandler,
-                                                         ReviewCodeHandler reviewCodeHandler) {
-        return new DiscordMessageListener(new EventRouterAdapter(createSessionHandler, registerStudentHandler,
-                registerReviewerHandler, approveReviewerHandler, reviewCodeHandler));
+    public ListenerAdapter discordMessageListenerAdapter(BeanFactory beanFactory) {
+        return new DiscordMessageListener(new EventRouterAdapter(beanFactory.getBean(CreateSessionHandler.class),
+                beanFactory.getBean(RegisterStudentHandler.class),
+                beanFactory.getBean(RegisterReviewerHandler.class),
+                beanFactory.getBean(ApproveReviewerHandler.class),
+                beanFactory.getBean(ReviewCodeHandler.class),
+                beanFactory.getBean(AddReviewerProgrammingLanguageHandler.class),
+                beanFactory.getBean(DeleteProgrammingLanguageHandler.class),
+                beanFactory.getBean(ApproveReviewerProgrammingLanguageHandler.class),
+                beanFactory.getBean(AddEmailToUserHandler.class)));
+    }
+
+    @Bean
+    public AddEmailToUserHandler addEmailToUserHandler(EntityManager entityManager) {
+        return new AddEmailToUserHandler(new AddEmailToUserUseCaseAdapter(JavaxMailIsEmailCorrectOutputPort.INSTANCE,
+                new JavaxPersistenceUpdateUserEmailByDiscordIdOutputPortAdapter(entityManager)));
+    }
+
+    @Bean
+    public ApproveReviewerProgrammingLanguageHandler approveReviewerProgrammingLanguageHandler(
+            FindAdminByDiscordUserIdOutputPort findAdminByDiscordUserIdOutputPort,
+            FindUserByNicknameOutputPort findUserByNicknameOutputPort,
+            FindReviewerByUserIdOutputPort findReviewerByUserIdOutputPort,
+            FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByAliasOutputPort,
+            InsertReviewerProgrammingLanguageOutputPort insertReviewerProgrammingLanguageOutputPort,
+            TransactionOperations transactionOperations,
+            SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort
+            ) {
+        return new ApproveReviewerProgrammingLanguageHandler(new ApproveReviewerProgrammingLanguageUseCaseAdapter(
+                findAdminByDiscordUserIdOutputPort,
+                findUserByNicknameOutputPort,
+                findReviewerByUserIdOutputPort,
+                findProgrammingLanguageByAliasOutputPort,
+                insertReviewerProgrammingLanguageOutputPort,
+                transactionOperations,
+                sendMessageByDiscordIdOutputPort));
+    }
+
+    @Bean
+    public FindAdminByDiscordUserIdOutputPort findAdminByDiscordUserIdOutputPort(EntityManager entityManager) {
+        return new JavaxPersistenceFindAdminByDiscordUserIdOutputPortAdapter(entityManager, AdminRowMapper.INSTANCE);
+    }
+
+    @Bean
+    public DeleteProgrammingLanguageHandler deleteProgrammingLanguageHandler(
+            FindReviewerByDiscordIdOutputPort findReviewerByDiscordIdOutputPort,
+            FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByAliasOutputPort,
+            TransactionOperations transactionOperations,
+            EntityManager entityManager) {
+        return new DeleteProgrammingLanguageHandler(new DeleteProgrammingLanguageUseCaseAdapter(
+                findReviewerByDiscordIdOutputPort,
+                findProgrammingLanguageByAliasOutputPort,
+                transactionOperations,
+                new JavaxPersistenceDeleteReviewerProgrammingLanguageOutputPortAdapter(entityManager)));
+    }
+
+    @Bean
+    public AddReviewerProgrammingLanguageHandler addReviewerProgrammingLanguageHandler(
+            FindReviewerByDiscordIdOutputPort findReviewerByDiscordIdOutputPort,
+            EntityManager entityManager,
+            SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort,
+            FindAdminsOutputPort findAdminsOutputPort,
+            FindUserByIdInOutputPort findUserByIdInOutputPort) {
+        return new AddReviewerProgrammingLanguageHandler(new AddReviewerProgrammingLanguageUseCaseAdapter(
+                findReviewerByDiscordIdOutputPort,
+                new JavaxPersistenceReviewerProgrammingLanguageExistOutputPortAdapter(entityManager),
+                sendMessageByDiscordIdOutputPort,
+                findAdminsOutputPort,
+                findUserByIdInOutputPort
+                ));
+    }
+
+    @Bean
+    public FindReviewerByDiscordIdOutputPort findReviewerByDiscordIdOutputPort(EntityManager entityManager) {
+        return new JavaxPersistenceFindReviewerByDiscordIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE);
+    }
+
+    @Bean
+    public InsertReviewerProgrammingLanguageOutputPort insertReviewerProgrammingLanguageOutputPort(
+            EntityManager entityManager) {
+        return new JavaxPersistenceInsertReviewerProgrammingLanguageOutputPortAdapter(entityManager);
     }
 
     @Bean
     public CreateSessionHandler createSessionHandler(EntityManager entityManager,
                                                      SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort,
                                                      TransactionOperations transactionOperations,
-                                                     FindProgrammingLanguageByNameOutputPort
-                                                                 findProgrammingLanguageByNameOutputPort,
+                                                     FindProgrammingLanguageByAliasOutputPort
+																 findProgrammingLanguageByAliasOutputPort,
                                                      FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
                                                      FindStudentByUserIdOutputPort findStudentByUserIdOutputPort) {
         return new CreateSessionHandler(new CreateSessionUseCaseAdapter(
                 findUserByDiscordIdOutputPort,
                 findStudentByUserIdOutputPort,
-                findProgrammingLanguageByNameOutputPort,
+				findProgrammingLanguageByAliasOutputPort,
                 new JavaxPersistenceFindAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPortAdapter(
                         entityManager, SessionRowMapper.INSTANCE),
                 new JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAdapter(entityManager,
@@ -83,12 +159,13 @@ public class MainConfiguration {
     public ReviewCodeHandler reviewCodeHandler(FindUserByNicknameOutputPort findUserByNicknameOutputPort,
                                                FindStudentByUserIdOutputPort findStudentByUserIdOutputPort,
                                                EntityManager entityManager,
+                                               FindReviewerByDiscordIdOutputPort findReviewerByDiscordIdOutputPort,
                                                TransactionOperations transactionOperations,
                                                SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort
                                                ) {
         return new ReviewCodeHandler(new ReviewCodeUseCaseAdapter(findUserByNicknameOutputPort,
                 findStudentByUserIdOutputPort,
-                new JavaxPersistenceFindReviewerByDiscordIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE),
+                findReviewerByDiscordIdOutputPort,
                 new JavaxPersistenceFindCreatedSessionByStudentIdAndReviewerIdOutputPortAdapter(entityManager,
                         SessionRowMapper.INSTANCE),
                 new JavaxPersistenceUpdateCreatedTaskBySessionIdOutputPortAdapter(entityManager),
@@ -104,36 +181,53 @@ public class MainConfiguration {
 
     @Bean
     public ApproveReviewerHandler approveReviewerHandler(EntityManager entityManager,
+                                                         FindAdminByDiscordUserIdOutputPort
+                                                                 findAdminByDiscordUserIdOutputPort,
                                                          SendMessageByDiscordIdOutputPort
                                                                  sendMessageByDiscordIdOutputPort,
                                                          FindUserByNicknameOutputPort findUserByNicknameOutputPort,
-                                                         FindProgrammingLanguageByNameOutputPort
-                                                                     findProgrammingLanguageByNameOutputPort,
-                                                         TransactionOperations transactionOperations) {
+                                                         FindProgrammingLanguageByAliasOutputPort
+																	 findProgrammingLanguageByAliasOutputPort,
+                                                         TransactionOperations transactionOperations,
+                                                         InsertReviewerProgrammingLanguageOutputPort
+                                                                     insertReviewerProgrammingLanguageOutputPort) {
         return new ApproveReviewerHandler(new ApproveReviewerUseCaseAdapter(
-                new JavaxPersistenceFindAdminByDiscordUserIdOutputPortAdapter(entityManager, AdminRowMapper.INSTANCE),
+                findAdminByDiscordUserIdOutputPort,
                 findUserByNicknameOutputPort,
                 new JavaxPersistenceInsertReviewerOutputPortAdapter(entityManager),
-                new JavaxPersistenceInsertReviewerProgrammingLanguageOutputPortAdapter(entityManager),
-                findProgrammingLanguageByNameOutputPort,
+                insertReviewerProgrammingLanguageOutputPort,
+				findProgrammingLanguageByAliasOutputPort,
                 sendMessageByDiscordIdOutputPort,
                 transactionOperations));
     }
 
     @Bean
     public RegisterReviewerHandler registerReviewerHandler(FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
-                                                           EntityManager entityManager,
                                                            InsertUserOutputPort insertUserOutputPort,
                                                            SendMessageByDiscordIdOutputPort
                                                                        sendMessageByDiscordIdOutputPort,
-                                                           TransactionOperations transactionOperations) {
+                                                           TransactionOperations transactionOperations,
+                                                           FindReviewerByUserIdOutputPort
+                                                                       findReviewerByUserIdOutputPort,
+                                                           FindAdminsOutputPort findAdminsOutputPort,
+                                                           FindUserByIdInOutputPort findUserByIdInOutputPort) {
         return new RegisterReviewerHandler(new RegisterReviewerUseCaseAdapter(findUserByDiscordIdOutputPort,
-                new JavaxPersistenceFindReviewerByUserIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE),
+                findReviewerByUserIdOutputPort,
                 insertUserOutputPort,
                 sendMessageByDiscordIdOutputPort,
-                new JavaxPersistenceFindAdminsOutputPortAdapter(entityManager, AdminRowMapper.INSTANCE),
-                new JavaxPersistenceFindUserByIdInOutputPortAdapter(entityManager, UserRowMapper.INSTANCE),
+                findAdminsOutputPort,
+                findUserByIdInOutputPort,
                 transactionOperations));
+    }
+
+    @Bean
+    public FindUserByIdInOutputPort findUserByIdInOutputPort(EntityManager entityManager) {
+        return new JavaxPersistenceFindUserByIdInOutputPortAdapter(entityManager, UserRowMapper.INSTANCE);
+    }
+
+    @Bean
+    public FindAdminsOutputPort findAdminsOutputPort(EntityManager entityManager) {
+        return new JavaxPersistenceFindAdminsOutputPortAdapter(entityManager, AdminRowMapper.INSTANCE);
     }
 
     @Bean
@@ -150,9 +244,14 @@ public class MainConfiguration {
     }
 
     @Bean
-    public FindProgrammingLanguageByNameOutputPort findProgrammingLanguageByNameOutputPort(EntityManager
+    public FindReviewerByUserIdOutputPort findReviewerByUserIdOutputPort(EntityManager entityManager) {
+        return new JavaxPersistenceFindReviewerByUserIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE);
+    }
+
+    @Bean
+    public FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByNameOutputPort(EntityManager
                                                                                                        entityManager) {
-        return new JavaxPersistenceFindProgrammingLanguageByNameOutputPortAdapter(entityManager,
+        return new JavaxPersistenceFindProgrammingLanguageByAliasOutputPortAdapter(entityManager,
                 ProgrammingLanguageRowMapper.INSTANCE);
     }
 

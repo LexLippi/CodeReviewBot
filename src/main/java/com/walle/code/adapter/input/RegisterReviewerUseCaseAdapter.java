@@ -58,7 +58,8 @@ public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUse
 									.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
 											adminUser.getDiscordId(),
 											 THIS_USER + command.getNickname() + WANT_TO_BE_REVIEWER +
-													 command.getProgrammingLanguages() + PLEASE_CONNECT));
+													 String.join(",", command.getProgrammingLanguages()) +
+													 PLEASE_CONNECT));
 							return RegisterReviewer.Result.success();
 						}))
 				.orElseGet(() -> {
