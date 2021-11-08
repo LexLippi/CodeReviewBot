@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.support.TransactionOperations;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * Реализация {@link ApproveReviewerUseCase}.
@@ -35,7 +34,7 @@ public final class ApproveReviewerUseCaseAdapter implements ApproveReviewerUseCa
 	private final InsertReviewerProgrammingLanguageOutputPort insertReviewerProgrammingLanguageOutputPort;
 
 	@NonNull
-	private final FindProgrammingLanguageByNameOutputPort findProgrammingLanguageByNameOutputPort;
+	private final FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByAliasOutputPort;
 
 	@NonNull
 	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
@@ -53,8 +52,8 @@ public final class ApproveReviewerUseCaseAdapter implements ApproveReviewerUseCa
 								var reviewerId = this.insertReviewerOutputPort.insertReviewer(ReviewerRow.of(
 										null, user.getId()));
 								Arrays.stream(command.getProgrammingLanguages())
-										.forEach(programmingLanguageName -> this.findProgrammingLanguageByNameOutputPort
-												.findProgrammingLanguageByName(programmingLanguageName)
+										.forEach(programmingLanguageName -> this.findProgrammingLanguageByAliasOutputPort
+												.findProgrammingLanguageByAlias(programmingLanguageName)
 												.ifPresentOrElse(programmingLanguage ->
 														this.insertReviewerProgrammingLanguageOutputPort
 																.insertReviewerProgrammingLanguage(

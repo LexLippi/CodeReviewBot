@@ -17,7 +17,11 @@ public final class EventRouterAdapter implements EventRouter {
 	public static final String REGISTER_COMMAND = "!register";
 	public static final String REGISTER_REVIEWER_COMMAND = "!reviewer";
 	public static final String APPROVE_COMMAND_PREFIX = "!approve";
-	public static final String CODE_REVIEW_PREFIX = "!codeReview";
+	public static final String CODE_REVIEW_PREFIX = "!code_review";
+	public static final String ADD_PROGRAMMING_LANGUAGE_PREFIX = "!add_programming_language";
+	public static final String APPROVE_REVIEWER_PROGRAMMING_LANGUAGE = "!approve_reviewer_programming_language";
+	public static final String DELETE_PROGRAMMING_LANGUAGE_PREFIX = "!delete_programming_language";
+	public static final String ADD_EMAIL_PREFIX = "!add_email";
 
 	@NonNull
 	private final CreateSessionHandler createSessionHandler;
@@ -33,6 +37,18 @@ public final class EventRouterAdapter implements EventRouter {
 
 	@NonNull
 	private final ReviewCodeHandler reviewCodeHandler;
+
+	@NonNull
+	private final AddReviewerProgrammingLanguageHandler addReviewerProgrammingLanguageHandler;
+
+	@NonNull
+	private final DeleteProgrammingLanguageHandler deleteProgrammingLanguageHandler;
+
+	@NonNull
+	private final ApproveReviewerProgrammingLanguageHandler approveReviewerProgrammingLanguageHandler;
+
+	@NonNull
+	private final AddEmailToUserHandler addEmailToUserHandler;
 
 	@Override
 	public String routingEvent(MessageReceivedEvent event) {
@@ -54,6 +70,22 @@ public final class EventRouterAdapter implements EventRouter {
 
 		if (event.getMessage().getContentRaw().startsWith(CODE_REVIEW_PREFIX)) {
 			return this.reviewCodeHandler.handle(event);
+		}
+
+		if (event.getMessage().getContentRaw().startsWith(ADD_PROGRAMMING_LANGUAGE_PREFIX)) {
+			return this.addReviewerProgrammingLanguageHandler.handle(event);
+		}
+
+		if (event.getMessage().getContentRaw().startsWith(DELETE_PROGRAMMING_LANGUAGE_PREFIX)) {
+			return this.deleteProgrammingLanguageHandler.handle(event);
+		}
+
+		if (event.getMessage().getContentRaw().startsWith(APPROVE_REVIEWER_PROGRAMMING_LANGUAGE)) {
+			return this.approveReviewerProgrammingLanguageHandler.handle(event);
+		}
+
+		if (event.getMessage().getContentRaw().startsWith(ADD_EMAIL_PREFIX)) {
+			return this.addEmailToUserHandler.handle(event);
 		}
 
 		throw new IllegalArgumentException();
