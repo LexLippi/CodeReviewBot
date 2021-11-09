@@ -19,7 +19,7 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 public final class JavaxPersistenceFindUserByDiscordIdOutputPortAdapter implements FindUserByDiscordIdOutputPort {
-	public static final String QUERY = "select id, id_discord, c_nickname, c_first_name, c_surname, c_email " +
+	public static final String QUERY = "select id, id_discord, c_nickname, c_first_name, c_surname, c_email, id_chat " +
 			"from t_user where id_discord = :discordId";
 	public static final String PARAM_DISCORD_ID = "discordId";
 

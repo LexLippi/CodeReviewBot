@@ -18,7 +18,7 @@ import javax.persistence.Tuple;
  */
 @RequiredArgsConstructor
 public final class JavaxPersistenceFindUserByIdOutputPortAdapter implements FindUserByIdOutputPort {
-	public static final String QUERY = "select id, id_discord, c_nickname, c_first_name, c_surname, c_email " +
+	public static final String QUERY = "select id, id_discord, c_nickname, c_first_name, c_surname, c_email, id_chat " +
 			"from t_user where id = :id";
 	public static final String PARAM_ID = "id";
 

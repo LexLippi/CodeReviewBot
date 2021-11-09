@@ -19,24 +19,28 @@ public final class CreateSession extends Command {
 
 	private final String codeText;
 
+	private final String taskUrlLink;
+
 	private final String programmingLanguageName;
 
 
 	public static CreateSession of(@NonNull DiscordUserId discordUserId, @NonNull String codeText,
-								   @NonNull String programmingLanguageName) {
-		return of(Instant.now(), discordUserId, codeText, programmingLanguageName);
+								   @NonNull String programmingLanguageName, @NonNull String taskUrlLink) {
+		return of(Instant.now(), discordUserId, codeText, programmingLanguageName, taskUrlLink);
 	}
 
 	public static CreateSession of(@NonNull Instant timestamp, @NonNull DiscordUserId discordUserId,
-								   @NonNull String codeText, @NonNull String programmingLanguageName) {
-		return new CreateSession(timestamp, discordUserId, codeText, programmingLanguageName);
+								   @NonNull String codeText, @NonNull String programmingLanguageName,
+								   @NonNull String taskUrlLink) {
+		return new CreateSession(timestamp, discordUserId, codeText, programmingLanguageName, taskUrlLink);
 	}
 
 	private CreateSession(@NonNull Instant timestamp, @NonNull DiscordUserId discordUserId, @NonNull String codeText,
-						 @NonNull String programmingLanguageName) {
+						 @NonNull String programmingLanguageName, @NonNull String taskUrlLink) {
 		super(timestamp, discordUserId);
 		this.codeText = codeText;
 		this.programmingLanguageName = programmingLanguageName;
+		this.taskUrlLink = taskUrlLink;
 	}
 
 	public interface Result {

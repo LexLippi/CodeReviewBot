@@ -19,6 +19,8 @@ import org.springframework.transaction.support.TransactionOperations;
  */
 @RequiredArgsConstructor
 public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
+	public static final String LINE_BREAK = "\n";
+
 	@NonNull
 	private final FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort;
 
@@ -29,8 +31,7 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 	private final FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByAliasOutputPort;
 
 	@NonNull
-	private final FindAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPort
-			findAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPort;
+	private final FindAdjustmentSessionByURLLinkOutputPort findAdjustmentSessionByURLLinkOutputPort;
 
 	@NonNull
 	private final FindReviewerOutputPort findReviewerOutputPort;
@@ -61,18 +62,16 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 						.map(student -> this.findProgrammingLanguageByAliasOutputPort.findProgrammingLanguageByAlias(
 								command.getProgrammingLanguageName())
 								.map(programmingLanguage -> this.transactionOperations.execute(transactionStatus ->
-										this.findAdjustmentSessionByStudentIdAndProgrammingLanguageIdOutputPort
-												.findAdjustmentSessionByStudentIdAndProgrammingLanguageId(
-														student.getId(),
-														programmingLanguage.getId())
+										this.findAdjustmentSessionByURLLinkOutputPort
+												.findAdjustmentSessionByURLLink(command.getTaskUrlLink())
 												.map(session -> {
 													this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
 															this.findUserByIdOutputPort.findUserById(
 																	this.findReviewerByIdOutputPort.findReviewerById(
 																			session.getReviewerId())
-																			.getUserId())
-																	.getDiscordId(),
-															command.getCodeText());
+																			.getUserId()).getDiscordId(),
+															command.getTaskUrlLink() + LINE_BREAK + command
+																	.getCodeText());
 													return CreateSession.Result.success(this.insertTaskOutputPort
 															.insertTask(TaskRow.of(null,
 																	session.getId(),

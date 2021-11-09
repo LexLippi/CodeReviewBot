@@ -1,6 +1,6 @@
 package com.walle.code.router;
 
-import com.walle.code.handler.*;
+import com.walle.code.handler.discord.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
  */
 @RequiredArgsConstructor
 public final class EventRouterAdapter implements EventRouter {
-	public static final String CODE_PREFIX = "```";
+	public static final String SUBMIT_PREFIX = "!submit";
 	public static final String REGISTER_COMMAND = "!register";
 	public static final String REGISTER_REVIEWER_COMMAND = "!reviewer";
 	public static final String APPROVE_COMMAND_PREFIX = "!approve";
@@ -22,6 +22,9 @@ public final class EventRouterAdapter implements EventRouter {
 	public static final String APPROVE_REVIEWER_PROGRAMMING_LANGUAGE = "!approve_reviewer_programming_language";
 	public static final String DELETE_PROGRAMMING_LANGUAGE_PREFIX = "!delete_programming_language";
 	public static final String ADD_EMAIL_PREFIX = "!add_email";
+	public static final String ADD_TELEGRAM_PREFIX = "!add_telegram";
+	public static final String REGISTER_ADMIN_COMMAND = "!admin";
+	public static final String APPROVE_ADMIN_REGISTER_COMMAND = "!approve_admin";
 
 	@NonNull
 	private final CreateSessionHandler createSessionHandler;
@@ -50,42 +53,63 @@ public final class EventRouterAdapter implements EventRouter {
 	@NonNull
 	private final AddEmailToUserHandler addEmailToUserHandler;
 
+	@NonNull
+	private final CreateRequestToAddTelegramHandler createRequestToAddTelegramHandler;
+
+	@NonNull
+	private final RegisterAdminHandler registerAdminHandler;
+
+	@NonNull
+	private final ApproveAdminHandler approveAdminHandler;
+
 	@Override
 	public String routingEvent(MessageReceivedEvent event) {
-		if (event.getMessage().getContentRaw().startsWith(CODE_PREFIX)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(SUBMIT_PREFIX)) {
 			return this.createSessionHandler.handle(event);
 		}
 
-		if (event.getMessage().getContentRaw().startsWith(REGISTER_COMMAND)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(REGISTER_COMMAND)) {
 			return this.registerStudentHandler.handle(event);
 		}
 
-		if (event.getMessage().getContentRaw().startsWith(REGISTER_REVIEWER_COMMAND)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(REGISTER_REVIEWER_COMMAND)) {
 			return this.registerReviewerHandler.handle(event);
 		}
 
-		if (event.getMessage().getContentRaw().startsWith(APPROVE_COMMAND_PREFIX)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(APPROVE_COMMAND_PREFIX)) {
 			return this.approveReviewerHandler.handle(event);
 		}
 
-		if (event.getMessage().getContentRaw().startsWith(CODE_REVIEW_PREFIX)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(CODE_REVIEW_PREFIX)) {
 			return this.reviewCodeHandler.handle(event);
 		}
 
-		if (event.getMessage().getContentRaw().startsWith(ADD_PROGRAMMING_LANGUAGE_PREFIX)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(ADD_PROGRAMMING_LANGUAGE_PREFIX)) {
 			return this.addReviewerProgrammingLanguageHandler.handle(event);
 		}
 
-		if (event.getMessage().getContentRaw().startsWith(DELETE_PROGRAMMING_LANGUAGE_PREFIX)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(DELETE_PROGRAMMING_LANGUAGE_PREFIX)) {
 			return this.deleteProgrammingLanguageHandler.handle(event);
 		}
 
-		if (event.getMessage().getContentRaw().startsWith(APPROVE_REVIEWER_PROGRAMMING_LANGUAGE)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(APPROVE_REVIEWER_PROGRAMMING_LANGUAGE)) {
 			return this.approveReviewerProgrammingLanguageHandler.handle(event);
 		}
 
-		if (event.getMessage().getContentRaw().startsWith(ADD_EMAIL_PREFIX)) {
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(ADD_EMAIL_PREFIX)) {
 			return this.addEmailToUserHandler.handle(event);
+		}
+
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(ADD_TELEGRAM_PREFIX)) {
+			return this.createRequestToAddTelegramHandler.handle(event);
+		}
+
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(REGISTER_ADMIN_COMMAND)) {
+			return this.registerAdminHandler.handle(event);
+		}
+
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(APPROVE_ADMIN_REGISTER_COMMAND)) {
+			return this.approveAdminHandler.handle(event);
 		}
 
 		throw new IllegalArgumentException();

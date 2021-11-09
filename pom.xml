@@ -16,6 +16,7 @@
     <properties>
         <java.version>11</java.version>
         <testcontainers.version>1.16.0</testcontainers.version>
+        <telegram.version>5.0.1</telegram.version>
     </properties>
     <dependencies>
         <dependency>
@@ -30,6 +31,16 @@
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
             <version>1.5.0-b01</version>
+        </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots</artifactId>
+            <version>${telegram.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambotsextensions</artifactId>
+            <version>${telegram.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>

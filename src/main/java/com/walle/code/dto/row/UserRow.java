@@ -43,4 +43,9 @@ public final class UserRow {
 	 */
 	private final Email email;
 
+	/**
+	 * Идентификатор чата в Telegram
+	 */
+	private final Long chatId;
+
 }
