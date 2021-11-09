@@ -1,9 +1,9 @@
 package com.walle.code.adapter.input;
 
-import com.walle.code.command.RegisterReviewer;
+import com.walle.code.command.RegisterAdmin;
 import com.walle.code.dto.row.AdminRow;
 import com.walle.code.dto.row.UserRow;
-import com.walle.code.port.input.RegisterReviewerUseCase;
+import com.walle.code.port.input.RegisterAdminUseCase;
 import com.walle.code.port.output.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -12,22 +12,21 @@ import org.springframework.transaction.support.TransactionOperations;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * Реализация {@link RegisterReviewerUseCase}.
+ * Реализация {@link RegisterAdminUseCase}.
  *
  * @author <a href="mailto:alekseilipatkin@mail.ru">Алексей Липаткин</a>.
  * @since 21.1.0
  */
 @RequiredArgsConstructor
-public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUseCase {
+public final class RegisterAdminUseCaseAdapter implements RegisterAdminUseCase {
 	public static final String THIS_USER = "This user ";
-	public static final String WANT_TO_BE_REVIEWER = " want to be reviewer. With next programming languages: ";
-	public static final String PLEASE_CONNECT = "Please, connect with him!";
+	public static final String WANT_TO_BE_ADMIN = " want to be admin. Please, connect with him!";
 
 	@NonNull
 	private final FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort;
 
 	@NonNull
-	private final FindReviewerByUserIdOutputPort findReviewerByUserIdOutputPort;
+	private final FindAdminByDiscordUserIdOutputPort findAdminByDiscordUserIdOutputPort;
 
 	@NonNull
 	private final InsertUserOutputPort insertUserOutputPort;
@@ -46,10 +45,11 @@ public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUse
 
 	@Override
 	@NonNull
-	public RegisterReviewer.Result registerReviewer(@NonNull RegisterReviewer command) {
+	public RegisterAdmin.Result registerAdmin(@NonNull RegisterAdmin command) {
 		return this.findUserByDiscordIdOutputPort.findUserByDiscordId(command.getDiscordUserId())
-				.map(user -> this.findReviewerByUserIdOutputPort.findReviewerByUserId(user.getId())
-						.map(reviewer -> RegisterReviewer.Result.reviewerAlreadyRegister(reviewer.getId()))
+				.map(user -> this.findAdminByDiscordUserIdOutputPort.findAdminByDiscordUserId(command
+						.getDiscordUserId())
+						.map(admin -> RegisterAdmin.Result.adminAlreadyRegister(admin.getId()))
 						.orElseGet(() -> {
 							this.findUserByIdInOutputPort.findUserByIdIn(this.findAdminsOutputPort.findAdmins()
 									.stream()
@@ -57,10 +57,8 @@ public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUse
 									.collect(toSet()))
 									.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
 											adminUser.getDiscordId(),
-											 THIS_USER + command.getNickname() + WANT_TO_BE_REVIEWER +
-													 String.join(",", command.getProgrammingLanguages()) +
-													 PLEASE_CONNECT));
-							return RegisterReviewer.Result.success();
+											 THIS_USER + command.getNickname() + WANT_TO_BE_ADMIN));
+							return RegisterAdmin.Result.success();
 						}))
 				.orElseGet(() -> {
 					this.transactionOperations.executeWithoutResult(status -> this.insertUserOutputPort.insertUser(
@@ -77,8 +75,8 @@ public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUse
 							.collect(toSet()))
 							.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
 									adminUser.getDiscordId(),
-									THIS_USER + command.getNickname() + WANT_TO_BE_REVIEWER));
-					return RegisterReviewer.Result.success();
+									THIS_USER + command.getNickname() + WANT_TO_BE_ADMIN));
+					return RegisterAdmin.Result.success();
 				});
 	}
 }

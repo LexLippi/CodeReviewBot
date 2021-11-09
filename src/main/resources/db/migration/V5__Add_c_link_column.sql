@@ -1,0 +1,1 @@
+alter table t_session add column c_url_link text not null default '';

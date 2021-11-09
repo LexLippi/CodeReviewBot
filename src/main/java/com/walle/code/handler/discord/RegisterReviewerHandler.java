@@ -1,4 +1,4 @@
-package com.walle.code.handler;
+package com.walle.code.handler.discord;
 
 import com.walle.code.command.RegisterReviewer;
 import com.walle.code.command.RegisterStudent;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Компонент для обработки регистрации пользователя.
+ * Компонент для обработки регистрации ревьюера.
  *
  * @author <a href="mailto:alekseilipatkin@mail.ru">Алексей Липаткин</a>.
  * @since 21.1.0

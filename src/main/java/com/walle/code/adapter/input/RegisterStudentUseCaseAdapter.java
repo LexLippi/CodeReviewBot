@@ -54,6 +54,7 @@ public final class RegisterStudentUseCaseAdapter implements RegisterStudentUseCa
 										command.getNickname(),
 										null,
 										null,
+										null,
 										null)))))));
 	}
 }

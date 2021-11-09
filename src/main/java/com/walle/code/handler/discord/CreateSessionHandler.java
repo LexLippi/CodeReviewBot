@@ -1,4 +1,4 @@
-package com.walle.code.handler;
+package com.walle.code.handler.discord;
 
 import com.walle.code.command.CreateSession;
 import com.walle.code.domain.id.DiscordUserId;
@@ -9,6 +9,12 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import javax.annotation.Nonnull;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 /**
  * Компонент для обработки создания сеанса код-ревью.
  *
@@ -18,19 +24,28 @@ import javax.annotation.Nonnull;
 @RequiredArgsConstructor
 public final class CreateSessionHandler {
 	public static final String EMPTY_STRING = "";
+	public static final String SPACE = " ";
 	public static final String CODE_QUOTE = "`";
 	public static final String LINE_BREAK = "\n";
 	public static final int FIRST_LINE = 0;
+	public static final int SECOND_LINE = 1;
 
 	@NonNull
 	private final CreateSessionUseCase createSessionUseCase;
 
 	@NonNull
 	public String handle(@Nonnull MessageReceivedEvent event) {
+		var lines = event.getMessage().getContentRaw().lines().collect(toList());
+
+		if (lines.size() < 2) {
+			throw new IllegalArgumentException();
+		}
+
 		return this.createSessionUseCase.createSessionUseCase(CreateSession.of(
 				DiscordUserId.of(event.getAuthor().getId()),
-				event.getMessage().getContentRaw(),
-				event.getMessage().getContentRaw().split(LINE_BREAK)[FIRST_LINE].replace(CODE_QUOTE, EMPTY_STRING)))
+				lines.stream().skip(1).collect(joining(LINE_BREAK)),
+				Arrays.stream(lines.get(FIRST_LINE).split(SPACE)).skip(1).collect(joining(SPACE)),
+				lines.get(SECOND_LINE).replace(CODE_QUOTE, EMPTY_STRING)))
 				.mapWith(CreateSessionResultToStringMapper.INSTANCE);
 	}
 

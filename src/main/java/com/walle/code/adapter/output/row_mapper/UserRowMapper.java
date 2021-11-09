@@ -17,6 +17,7 @@ public enum UserRowMapper implements RowMapper<UserRow> {
 	public static final String PARAM_C_FIRST_NAME = "c_first_name";
 	public static final String PARAM_C_SURNAME = "c_surname";
 	public static final String PARAM_C_EMAIL  = "c_email";
+	public static final String PARAM_ID_CHAT = "id_chat";
 
 	@Override
 	@NonNull
@@ -26,6 +27,7 @@ public enum UserRowMapper implements RowMapper<UserRow> {
 				resultSet.get(PARAM_C_NICKNAME, String.class),
 				resultSet.get(PARAM_C_FIRST_NAME, String.class),
 				resultSet.get(PARAM_C_SURNAME, String.class),
-				Email.of(resultSet.get(PARAM_C_EMAIL, String.class)));
+				Email.of(resultSet.get(PARAM_C_EMAIL, String.class)),
+				resultSet.get(PARAM_ID_CHAT, Long.class));
 	}
 }

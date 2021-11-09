@@ -1,4 +1,4 @@
-package com.walle.code.handler;
+package com.walle.code.handler.discord;
 
 import com.walle.code.command.ApproveReviewerProgrammingLanguage;
 import com.walle.code.domain.id.DiscordUserId;

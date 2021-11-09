@@ -1,4 +1,4 @@
-package com.walle.code.handler;
+package com.walle.code.handler.discord;
 
 import com.walle.code.command.AddEmailToUser;
 import com.walle.code.domain.id.DiscordUserId;
