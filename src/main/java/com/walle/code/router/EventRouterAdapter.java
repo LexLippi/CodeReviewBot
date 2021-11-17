@@ -25,6 +25,7 @@ public final class EventRouterAdapter implements EventRouter {
 	public static final String ADD_TELEGRAM_PREFIX = "!add_telegram";
 	public static final String REGISTER_ADMIN_COMMAND = "!admin";
 	public static final String APPROVE_ADMIN_REGISTER_COMMAND = "!approve_admin";
+	public static final String HELP_PREFIX = "!help";
 
 	@NonNull
 	private final CreateSessionHandler createSessionHandler;
@@ -61,6 +62,9 @@ public final class EventRouterAdapter implements EventRouter {
 
 	@NonNull
 	private final ApproveAdminHandler approveAdminHandler;
+
+	@NonNull
+	private final GetHelperHandler getHelperHandler;
 
 	@Override
 	public String routingEvent(MessageReceivedEvent event) {
@@ -110,6 +114,10 @@ public final class EventRouterAdapter implements EventRouter {
 
 		if (event.getMessage().getContentRaw().toLowerCase().startsWith(APPROVE_ADMIN_REGISTER_COMMAND)) {
 			return this.approveAdminHandler.handle(event);
+		}
+
+		if (event.getMessage().getContentRaw().toLowerCase().startsWith(HELP_PREFIX)) {
+			return this.getHelperHandler.handle(event);
 		}
 
 		throw new IllegalArgumentException();
