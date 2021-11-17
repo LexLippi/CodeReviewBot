@@ -5,6 +5,7 @@ import com.walle.code.wraps.ReviewerRowWrap;
 import lombok.NonNull;
 
 import javax.persistence.EntityManager;
+import java.math.BigInteger;
 
 /**
  * Реализация {@link RowWrapper<ReviewerRow, ReviewerRowWrap<Integer>>}
@@ -23,11 +24,11 @@ public enum ReviewerRowTasksWrapper implements RowWrapper<ReviewerRow, ReviewerR
     @Override
     @NonNull
     public ReviewerRowWrap<Integer> wrapRow(ReviewerRow resultSet, EntityManager entityManager) {
-        return ReviewerRowWrap.of((Integer)entityManager.createNativeQuery(QUERY, Integer.class)
-                .setParameter(PARAM_REVIEWER_ID, resultSet.getId())
+        return ReviewerRowWrap.of(((BigInteger)entityManager.createNativeQuery(QUERY)
+                .setParameter(PARAM_REVIEWER_ID, resultSet.getId().getValue())
                 .getResultList()
                 .stream()
                 .findFirst()
-                .get(), resultSet);
+                .get()).intValue(), resultSet);
     }
 }

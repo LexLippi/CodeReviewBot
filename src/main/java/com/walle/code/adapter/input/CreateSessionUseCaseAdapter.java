@@ -81,8 +81,15 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 												})
 												.orElse(this.findReviewerOutputPort.findReviewer(programmingLanguage
 														.getId())
-														.map(reviewer -> CreateSession.Result.success(
-																this.insertTaskOutputPort.insertTask(TaskRow.of(
+														.map(reviewer -> {
+															this.sendMessageByDiscordIdOutputPort
+																	.sendMessageByDiscordId(this.findUserByIdOutputPort
+																			.findUserById(reviewer.getUserId())
+																			.getDiscordId(),
+																			command.getTaskUrlLink() +
+																					LINE_BREAK + command.getCodeText());
+															return CreateSession.Result.success(
+																	this.insertTaskOutputPort.insertTask(TaskRow.of(
 																		null,
 																		this.insertSessionOutputPort.insertSession(
 																				SessionRow.of(null,
@@ -92,7 +99,8 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 																						SessionStatus.REVIEW)),
 																		command.getCodeText(),
 																		null,
-																		TaskStatus.CREATED))))
+																		TaskStatus.CREATED)));
+														})
 														.orElse(CreateSession.Result.reviewerNotFound()))))
 								.orElse(CreateSession.Result.programmingLanguageNotFound()))
 						.orElse(CreateSession.Result.studentNotFound()))

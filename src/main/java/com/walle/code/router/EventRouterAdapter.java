@@ -16,10 +16,10 @@ public final class EventRouterAdapter implements EventRouter {
 	public static final String SUBMIT_PREFIX = "!submit";
 	public static final String REGISTER_COMMAND = "!register";
 	public static final String REGISTER_REVIEWER_COMMAND = "!reviewer";
-	public static final String APPROVE_COMMAND_PREFIX = "!approve";
+	public static final String APPROVE_COMMAND_PREFIX = "!approve_reviewer";
 	public static final String CODE_REVIEW_PREFIX = "!code_review";
 	public static final String ADD_PROGRAMMING_LANGUAGE_PREFIX = "!add_programming_language";
-	public static final String APPROVE_REVIEWER_PROGRAMMING_LANGUAGE = "!approve_reviewer_programming_language";
+	public static final String APPROVE_REVIEWER_PROGRAMMING_LANGUAGE = "!approve_programming_language";
 	public static final String DELETE_PROGRAMMING_LANGUAGE_PREFIX = "!delete_programming_language";
 	public static final String ADD_EMAIL_PREFIX = "!add_email";
 	public static final String ADD_TELEGRAM_PREFIX = "!add_telegram";

@@ -22,8 +22,8 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 public final class JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAdapter implements FindReviewerOutputPort {
-    public static final String QUERY = "select trp.id_reviewer, tr.id_user from t_reviewer_programming_language trp " +
-            "inner join t_reviewer tr on trp.id_reviewer = tr.id" +
+    public static final String QUERY = "select trp.id_reviewer as id, tr.id_user from t_reviewer_programming_language trp " +
+            "inner join t_reviewer tr on trp.id_reviewer = tr.id " +
             "where trp.id_programming_language = :programmingLanguageID";
     public static final String PARAM_PROGRAMMING_LANGUAGE_ID = "programmingLanguageID";
 

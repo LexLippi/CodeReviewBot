@@ -6,6 +6,7 @@ import com.walle.code.port.output.IsEmailCorrectOutputPort;
 import com.walle.code.port.output.UpdateUserEmailByDiscordIdOutputPort;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.support.TransactionOperations;
 
 /**
  * Реализация {@link AddEmailToUserUseCase}
@@ -21,14 +22,17 @@ public final class AddEmailToUserUseCaseAdapter implements AddEmailToUserUseCase
 	@NonNull
 	private final UpdateUserEmailByDiscordIdOutputPort updateUserEmailByDiscordIdOutputPort;
 
+	@NonNull
+	private final TransactionOperations transactionOperations;
+
 	@Override
 	@NonNull
 	public AddEmailToUser.Result addEmailToUser(@NonNull AddEmailToUser command) {
-		if (isEmailCorrectOutputPort.isEmailCorrect(command.getEmail())) {
+		if (!isEmailCorrectOutputPort.isEmailCorrect(command.getEmail())) {
 			return AddEmailToUser.Result.emailIsNotCorrect();
 		}
-		this.updateUserEmailByDiscordIdOutputPort.updateUserEmailByDiscordId(command.getEmail(),
-				command.getDiscordUserId());
+		this.transactionOperations.executeWithoutResult(status -> this.updateUserEmailByDiscordIdOutputPort
+				.updateUserEmailByDiscordId(command.getEmail(), command.getDiscordUserId()));
 		return AddEmailToUser.Result.success();
 	}
 }

@@ -34,34 +34,34 @@ import javax.security.auth.login.LoginException;
 
 @Configuration
 public class MainConfiguration {
-    @Bean
-    @Profile("telegram")
-    public TelegramBotsApi telegramBotsApi(TelegramNotificationBot telegramNotificationBot) throws TelegramApiException {
-        var telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-        telegramBotsApi.registerBot(telegramNotificationBot);
-        return telegramBotsApi;
-    }
+//    @Bean
+//    @Profile("telegram")
+//    public TelegramBotsApi telegramBotsApi(TelegramNotificationBot telegramNotificationBot) throws TelegramApiException {
+//        var telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+//        telegramBotsApi.registerBot(telegramNotificationBot);
+//        return telegramBotsApi;
+//    }
+//
+//    @Bean
+//    @Profile("telegram")
+//    public TelegramNotificationBot telegramBot(@Value("${telegram.bot.token}") String botToken,
+//                                               @Value("${telegram.bot.name}") String botName,
+//                                               AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler) {
+//        return new TelegramNotificationBot(botToken, botName, addTelegramChatIdToUserHandler);
+//    }
 
-    @Bean
-    @Profile("telegram")
-    public TelegramNotificationBot telegramBot(@Value("${telegram.bot.token}") String botToken,
-                                               @Value("${telegram.bot.name}") String botName,
-                                               AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler) {
-        return new TelegramNotificationBot(botToken, botName, addTelegramChatIdToUserHandler);
-    }
+//    @Bean
+//    public AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler(EntityManager entityManager) {
+//        return new AddTelegramChatIdToUserHandler("start", "Начать",
+//                new AddTelegramChatIdToUserUseCaseAdapter(
+//                        new JavaxPersistenceFindUserIdByTelegramNicknameOutputPortAdapter(entityManager),
+//                        new JavaxPersistenceUpdateUserChatIdByIdOutputPortAdapter(entityManager)));
+//    }
 
-    @Bean
-    public AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler(EntityManager entityManager) {
-        return new AddTelegramChatIdToUserHandler("start", "Начать",
-                new AddTelegramChatIdToUserUseCaseAdapter(
-                        new JavaxPersistenceFindUserIdByTelegramNicknameOutputPortAdapter(entityManager),
-                        new JavaxPersistenceUpdateUserChatIdByIdOutputPortAdapter(entityManager)));
-    }
-
-    @Bean
-    public SendMessageOutputPort telegramSendMessageOutputPort(AbsSender absSender) {
-        return new TelegramSendMessageOutputPortAdapter(absSender);
-    }
+//    @Bean
+//    public SendMessageOutputPort telegramSendMessageOutputPort(AbsSender absSender) {
+//        return new TelegramSendMessageOutputPortAdapter(absSender);
+//    }
 
     @Bean
     @Profile("discord")
@@ -138,9 +138,11 @@ public class MainConfiguration {
     }
 
     @Bean
-    public AddEmailToUserHandler addEmailToUserHandler(EntityManager entityManager) {
+    public AddEmailToUserHandler addEmailToUserHandler(EntityManager entityManager,
+                                                       TransactionOperations transactionOperations) {
         return new AddEmailToUserHandler(new AddEmailToUserUseCaseAdapter(JavaxMailIsEmailCorrectOutputPort.INSTANCE,
-                new JavaxPersistenceUpdateUserEmailByDiscordIdOutputPortAdapter(entityManager)));
+                new JavaxPersistenceUpdateUserEmailByDiscordIdOutputPortAdapter(entityManager),
+                transactionOperations));
     }
 
     @Bean

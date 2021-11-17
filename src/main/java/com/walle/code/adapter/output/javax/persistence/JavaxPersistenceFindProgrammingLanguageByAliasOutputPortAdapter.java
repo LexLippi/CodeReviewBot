@@ -19,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public final class JavaxPersistenceFindProgrammingLanguageByAliasOutputPortAdapter
 		implements FindProgrammingLanguageByAliasOutputPort {
-	public static final String QUERY = "select id, c_name from t_programming_language tpl " +
+	public static final String QUERY = "select tpl.id, tpl.c_name from t_programming_language tpl " +
 			"inner join t_programming_language_alias tpla on tpl.id=tpla.id_programming_language " +
 			"where c_alias ilike :alias";
 	public static final String PARAM_ALIAS = "alias";

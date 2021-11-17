@@ -18,12 +18,11 @@ public final class JavaxPersistenceReviewerProgrammingLanguageExistOutputPortAda
 		implements ReviewerProgrammingLanguageExistOutputPort {
 	public static final String QUERY = "select 1 from t_reviewer_programming_language " +
 			"where id_reviewer = :reviewerId and id_programming_language = (" +
-			"select id from t_programming_language tpl " +
+			"select tpl.id from t_programming_language tpl " +
 			"inner join t_programming_language_alias tpla on tpl.id=tpla.id_programming_language " +
 			"where tpla.c_alias ilike :alias)";
 	public static final String PARAM_ALIAS = "alias";
 	public static final String PARAM_REVIEWER_ID = "reviewerId";
-
 
 	@NonNull
 	private final EntityManager entityManager;
@@ -31,9 +30,10 @@ public final class JavaxPersistenceReviewerProgrammingLanguageExistOutputPortAda
 	@Override
 	public boolean reviewerProgrammingLanguageExist(@NonNull ReviewerId reviewerId,
 													@NonNull String programmingLanguageAlias) {
-		return (boolean) entityManager.createNativeQuery(QUERY)
+		return !entityManager.createNativeQuery(QUERY)
 				.setParameter(PARAM_ALIAS, programmingLanguageAlias)
 				.setParameter(PARAM_REVIEWER_ID, reviewerId.getValue())
-				.getSingleResult();
+				.getResultList()
+				.isEmpty();
 	}
 }

@@ -2,6 +2,7 @@ package com.walle.code.adapter.output.javax.mail;
 
 import com.walle.code.port.output.IsEmailCorrectOutputPort;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -12,6 +13,7 @@ import javax.mail.internet.InternetAddress;
  * @author <a href="mailto:alekseilipatkin@mail.ru">Алексей Липаткин</a>.
  * @since 21.1.0
  */
+@Slf4j
 public enum JavaxMailIsEmailCorrectOutputPort implements IsEmailCorrectOutputPort {
 	INSTANCE;
 
@@ -21,6 +23,7 @@ public enum JavaxMailIsEmailCorrectOutputPort implements IsEmailCorrectOutputPor
 			new InternetAddress(email).validate();
 			return true;
 		} catch (AddressException addressException) {
+			log.error(addressException.getMessage(), addressException);
 			return false;
 		}
 	}
