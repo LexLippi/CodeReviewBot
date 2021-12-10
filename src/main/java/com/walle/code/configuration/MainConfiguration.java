@@ -5,6 +5,7 @@ import com.walle.code.adapter.output.javax.mail.JavaxMailIsEmailCorrectOutputPor
 import com.walle.code.adapter.output.javax.persistence.*;
 import com.walle.code.adapter.output.jda.JdaSendMessageByDiscordIdOutputPortAdapter;
 import com.walle.code.adapter.output.row_mapper.*;
+import com.walle.code.adapter.output.row_wrapper.ReviewerRowCodeStringsWrapper;
 import com.walle.code.adapter.output.row_wrapper.ReviewerRowTasksWrapper;
 import com.walle.code.adapter.output.telegram.TelegramSendMessageOutputPortAdapter;
 import com.walle.code.comparators.ReviewerRowWrapValueIncreaseComparator;
@@ -35,34 +36,34 @@ import java.util.List;
 
 @Configuration
 public class MainConfiguration {
-//    @Bean
-//    @Profile("telegram")
-//    public TelegramBotsApi telegramBotsApi(TelegramNotificationBot telegramNotificationBot) throws TelegramApiException {
-//        var telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-//        telegramBotsApi.registerBot(telegramNotificationBot);
-//        return telegramBotsApi;
-//    }
-//
-//    @Bean
-//    @Profile("telegram")
-//    public TelegramNotificationBot telegramBot(@Value("${telegram.bot.token}") String botToken,
-//                                               @Value("${telegram.bot.name}") String botName,
-//                                               AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler) {
-//        return new TelegramNotificationBot(botToken, botName, addTelegramChatIdToUserHandler);
-//    }
+    @Bean
+    @Profile("telegram")
+    public TelegramBotsApi telegramBotsApi(TelegramNotificationBot telegramNotificationBot) throws TelegramApiException {
+        var telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+        telegramBotsApi.registerBot(telegramNotificationBot);
+        return telegramBotsApi;
+    }
 
-//    @Bean
-//    public AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler(EntityManager entityManager) {
-//        return new AddTelegramChatIdToUserHandler("start", "Начать",
-//                new AddTelegramChatIdToUserUseCaseAdapter(
-//                        new JavaxPersistenceFindUserIdByTelegramNicknameOutputPortAdapter(entityManager),
-//                        new JavaxPersistenceUpdateUserChatIdByIdOutputPortAdapter(entityManager)));
-//    }
+    @Bean
+    @Profile("telegram")
+    public TelegramNotificationBot telegramBot(@Value("${telegram.bot.token}") String botToken,
+                                               @Value("${telegram.bot.name}") String botName,
+                                               AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler) {
+        return new TelegramNotificationBot(botToken, botName, addTelegramChatIdToUserHandler);
+    }
 
-//    @Bean
-//    public SendMessageOutputPort telegramSendMessageOutputPort(AbsSender absSender) {
-//        return new TelegramSendMessageOutputPortAdapter(absSender);
-//    }
+    @Bean
+    public AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler(EntityManager entityManager) {
+        return new AddTelegramChatIdToUserHandler("start", "Начать",
+                new AddTelegramChatIdToUserUseCaseAdapter(
+                        new JavaxPersistenceFindUserIdByTelegramNicknameOutputPortAdapter(entityManager),
+                        new JavaxPersistenceUpdateUserChatIdByIdOutputPortAdapter(entityManager)));
+    }
+
+    @Bean
+    public SendMessageOutputPort telegramSendMessageOutputPort(AbsSender absSender) {
+        return new TelegramSendMessageOutputPortAdapter(absSender);
+    }
 
     @Bean
     @Profile("discord")
@@ -228,7 +229,7 @@ public class MainConfiguration {
                         entityManager, SessionRowMapper.INSTANCE),
                 new JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAdapter(entityManager,
                         ReviewerRowWrapValueIncreaseComparator.INSTANCE,
-                        ReviewerRowTasksWrapper.INSTANCE,
+                        List.of(ReviewerRowTasksWrapper.INSTANCE, ReviewerRowCodeStringsWrapper.INSTANCE),
                         ReviewerRowMapper.INSTANCE),
                 new JavaxPersistenceFindReviewerByIdOutputPortAdapter(entityManager, ReviewerRowMapper.INSTANCE),
                 new JavaxPersistenceFindUserByIdOutputPortAdapter(entityManager, UserRowMapper.INSTANCE),
