@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Реализация {@link FindReviewerOutputPort} с использованием Javax Persistence.
@@ -34,7 +36,7 @@ public final class JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAd
     private final Comparator<ReviewerRowWrap<Integer>> reviewerRowComparator;
 
     @NonNull
-    private final RowWrapper<ReviewerRow, ReviewerRowWrap<Integer>> rowWrapper;
+    private final List<RowWrapper<ReviewerRow, ReviewerRowWrap<Integer>>> rowWrappers;
 
     @NonNull
     private final RowMapper<ReviewerRow> rowMapper;
@@ -42,11 +44,22 @@ public final class JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAd
     @Override
     @NonNull
     public Optional<ReviewerRow> findReviewer(@NonNull ProgrammingLanguageId programmingLanguageId) {
-        return this.entityManager.createNativeQuery(QUERY, Tuple.class)
+        var resultList = this.entityManager.createNativeQuery(QUERY, Tuple.class)
                 .setParameter(PARAM_PROGRAMMING_LANGUAGE_ID, programmingLanguageId.getValue())
-                .getResultList()
-                .stream()
-                .map(result -> this.rowWrapper.wrapRow(this.rowMapper.mapRow((Tuple) result), entityManager))
+                .getResultList();
+        for (var rowWrapper : rowWrappers) {
+            var sortedListOfReviewers = ((List<ReviewerRowWrap<Integer>>) resultList.stream()
+                    .map(result -> rowWrapper.wrapRow(this.rowMapper.mapRow((Tuple) result), entityManager))
+                    .sorted(reviewerRowComparator)
+                    .collect(Collectors.toList()));
+            var optimal = sortedListOfReviewers.get(0);
+
+            if (sortedListOfReviewers.size() <= 1 ||
+                reviewerRowComparator.compare(optimal, sortedListOfReviewers.get(1)) == 0)
+                return Optional.of(optimal.reviewerRow);
+        }
+        return resultList.stream().map(result -> rowWrappers.get(1)
+                        .wrapRow(this.rowMapper.mapRow((Tuple) result), entityManager))
                 .min(reviewerRowComparator)
                 .map(result -> ((ReviewerRowWrap<Integer>)result).reviewerRow);
     }

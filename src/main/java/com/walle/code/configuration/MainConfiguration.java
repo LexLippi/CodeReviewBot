@@ -31,6 +31,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import javax.persistence.EntityManager;
 import javax.security.auth.login.LoginException;
+import java.util.List;
 
 @Configuration
 public class MainConfiguration {
@@ -94,7 +95,8 @@ public class MainConfiguration {
                 beanFactory.getBean(AddEmailToUserHandler.class),
                 beanFactory.getBean(CreateRequestToAddTelegramHandler.class),
                 beanFactory.getBean(RegisterAdminHandler.class),
-                beanFactory.getBean(ApproveAdminHandler.class)));
+                beanFactory.getBean(ApproveAdminHandler.class),
+                beanFactory.getBean(GetHelperHandler.class)));
     }
 
     @Bean
