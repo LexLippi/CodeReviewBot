@@ -5,7 +5,7 @@ import com.walle.code.adapter.output.row_mapper.RowMapper;
 import javax.persistence.EntityManager;
 
 /**
- * Компонент для преобразования объектов, полученных из конвертации в {@link RowMapper<TRow>}
+ * Компонент для преобразования объектов, полученных из конвертации в {@link RowMapper<K>}
  * В качестве обёрток выступают данные из БД
  *
  * @author <a href="mailto:aleksey.bykov.01@mail.ru">Алексей Быков</a>.
@@ -13,11 +13,11 @@ import javax.persistence.EntityManager;
  */
 
 @FunctionalInterface
-public interface RowWrapper<TRow, TWrap> {
+public interface RowWrapper<K, V> {
     /**
-     * Метод преобразования объектов, полученных из конвертированных данных {@link TRow} в объекты типа {@link TWrap}
-     * @param resultSet объект, полученный из конвертации {@link TRow}
-     * @return объект типа {@link TWrap}
+     * Метод преобразования объектов, полученных из конвертированных данных {@link K} в объекты типа {@link V}
+     * @param resultSet объект, полученный из конвертации {@link K}
+     * @return объект типа {@link V}
      */
-    TWrap wrapRow(TRow resultSet, EntityManager entityManager);
+    V wrapRow(K resultSet, EntityManager entityManager);
 }
