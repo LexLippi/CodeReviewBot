@@ -3,7 +3,6 @@ package com.walle.code.adapter.output.row_wrapper;
 import com.walle.code.adapter.output.row_mapper.RowMapper;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Tuple;
 
 /**
  * Компонент для преобразования объектов, полученных из конвертации в {@link RowMapper<TRow>}

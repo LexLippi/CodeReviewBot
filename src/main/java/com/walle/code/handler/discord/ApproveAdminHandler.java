@@ -1,7 +1,6 @@
 package com.walle.code.handler.discord;
 
 import com.walle.code.command.ApproveAdmin;
-import com.walle.code.command.ApproveReviewer;
 import com.walle.code.domain.id.DiscordUserId;
 import com.walle.code.port.input.ApproveAdminUseCase;
 import lombok.NonNull;

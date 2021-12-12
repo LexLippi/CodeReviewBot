@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
-import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Реализация {@link FindAdminsOutputPort} с использованием Javax Persistence.

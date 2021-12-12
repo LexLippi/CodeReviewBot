@@ -15,7 +15,7 @@ public final class ReviewerRowWrap<T> {
     /**
      * Результат обёртки
      */
-    private final T wrap_value;
+    private final T wrapValue;
     /**
      * Исходное значение
      */

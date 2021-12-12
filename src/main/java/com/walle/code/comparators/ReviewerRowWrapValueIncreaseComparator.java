@@ -15,6 +15,6 @@ public enum ReviewerRowWrapValueIncreaseComparator implements Comparator<Reviewe
 
     @Override
     public int compare(ReviewerRowWrap<Integer> o1, ReviewerRowWrap<Integer> o2) {
-        return o1.getWrap_value().compareTo(o2.getWrap_value());
+        return o1.getWrapValue().compareTo(o2.getWrapValue());
     }
 }

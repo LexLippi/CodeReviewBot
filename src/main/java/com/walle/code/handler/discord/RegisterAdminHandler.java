@@ -1,16 +1,11 @@
 package com.walle.code.handler.discord;
 
 import com.walle.code.command.RegisterAdmin;
-import com.walle.code.command.RegisterReviewer;
 import com.walle.code.domain.id.DiscordUserId;
 import com.walle.code.port.input.RegisterAdminUseCase;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-
-import java.util.Arrays;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Компонент для обработки регистрации администратора.

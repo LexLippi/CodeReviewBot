@@ -8,9 +8,7 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import javax.annotation.Nonnull;
-
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;

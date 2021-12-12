@@ -1,10 +1,8 @@
 package com.walle.code.handler.discord;
 
 import com.walle.code.command.RegisterReviewer;
-import com.walle.code.command.RegisterStudent;
 import com.walle.code.domain.id.DiscordUserId;
 import com.walle.code.port.input.RegisterReviewerUseCase;
-import com.walle.code.port.input.RegisterStudentUseCase;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

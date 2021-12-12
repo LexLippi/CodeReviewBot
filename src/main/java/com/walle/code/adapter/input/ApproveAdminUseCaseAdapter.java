@@ -2,9 +2,11 @@ package com.walle.code.adapter.input;
 
 import com.walle.code.command.ApproveAdmin;
 import com.walle.code.dto.row.AdminRow;
-import com.walle.code.dto.row.ReviewerRow;
 import com.walle.code.port.input.ApproveAdminUseCase;
-import com.walle.code.port.output.*;
+import com.walle.code.port.output.FindAdminByDiscordUserIdOutputPort;
+import com.walle.code.port.output.FindUserByNicknameOutputPort;
+import com.walle.code.port.output.InsertAdminOutputPort;
+import com.walle.code.port.output.SendMessageOutputPort;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.support.TransactionOperations;
