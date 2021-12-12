@@ -2,8 +2,10 @@ package com.walle.code.configuration;
 
 import com.walle.code.adapter.input.*;
 import com.walle.code.adapter.output.javax.mail.JavaxMailIsEmailCorrectOutputPort;
+import com.walle.code.adapter.output.javax.mail.JavaxMailSendMessageOutputPortAdapter;
 import com.walle.code.adapter.output.javax.persistence.*;
-import com.walle.code.adapter.output.jda.JdaSendMessageByDiscordIdOutputPortAdapter;
+import com.walle.code.adapter.output.jda.JdaSendMessageOutputPortAdapter;
+import com.walle.code.adapter.output.proxy.ProxySendMessageOutputPortAdapter;
 import com.walle.code.adapter.output.row_mapper.*;
 import com.walle.code.adapter.output.row_wrapper.ReviewerRowCodeStringsWrapper;
 import com.walle.code.adapter.output.row_wrapper.ReviewerRowTasksWrapper;
@@ -30,6 +32,8 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.persistence.EntityManager;
 import javax.security.auth.login.LoginException;
 import java.util.List;
@@ -53,15 +57,17 @@ public class MainConfiguration {
     }
 
     @Bean
-    public AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler(EntityManager entityManager) {
+    public AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler(EntityManager entityManager,
+                                                                         TransactionOperations transactionOperations) {
         return new AddTelegramChatIdToUserHandler("start", "Начать",
                 new AddTelegramChatIdToUserUseCaseAdapter(
                         new JavaxPersistenceFindUserIdByTelegramNicknameOutputPortAdapter(entityManager),
-                        new JavaxPersistenceUpdateUserChatIdByIdOutputPortAdapter(entityManager)));
+                        new JavaxPersistenceUpdateUserChatIdByIdOutputPortAdapter(entityManager),
+                        transactionOperations));
     }
 
     @Bean
-    public SendMessageOutputPort telegramSendMessageOutputPort(AbsSender absSender) {
+    public SendMessageOutputPort telegramSendMessageOutputPortAdapter(AbsSender absSender) {
         return new TelegramSendMessageOutputPortAdapter(absSender);
     }
 
@@ -101,32 +107,35 @@ public class MainConfiguration {
     }
 
     @Bean
-    public ApproveAdminHandler approveAdminHandler(EntityManager entityManager,
-                                                   FindAdminByDiscordUserIdOutputPort
-                                                           findAdminByDiscordUserIdOutputPort,
-                                                   SendMessageByDiscordIdOutputPort
-                                                               sendMessageByDiscordIdOutputPort,
-                                                   FindUserByNicknameOutputPort findUserByNicknameOutputPort,
-                                                   TransactionOperations transactionOperations) {
+    public GetHelperHandler getHelperHandler() {
+        return new GetHelperHandler();
+    }
+
+    @Bean
+    public ApproveAdminHandler approveAdminHandler(
+            EntityManager entityManager,
+            FindAdminByDiscordUserIdOutputPort findAdminByDiscordUserIdOutputPort,
+            @Qualifier("proxySendMessageOutputPortAdapter") SendMessageOutputPort proxySendMessageOutputPortAdapter,
+            FindUserByNicknameOutputPort findUserByNicknameOutputPort,
+            TransactionOperations transactionOperations) {
         return new ApproveAdminHandler(new ApproveAdminUseCaseAdapter(findAdminByDiscordUserIdOutputPort,
                 findUserByNicknameOutputPort,
                 new JavaxPersistenceInsertAdminOutputPortAdapter(entityManager),
-                sendMessageByDiscordIdOutputPort,
+                proxySendMessageOutputPortAdapter,
                 transactionOperations));
     }
 
     @Bean
-    public RegisterAdminHandler registerAdminHandler(FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
-                                                     FindAdminByDiscordUserIdOutputPort
-                                                             findAdminByDiscordUserIdOutputPort,
-                                                     InsertUserOutputPort insertUserOutputPort,
-                                                     SendMessageByDiscordIdOutputPort
-                                                                 sendMessageByDiscordIdOutputPort,
-                                                     TransactionOperations transactionOperations,
-                                                     FindAdminsOutputPort findAdminsOutputPort,
-                                                     FindUserByIdInOutputPort findUserByIdInOutputPort) {
+    public RegisterAdminHandler registerAdminHandler(
+            FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
+            FindAdminByDiscordUserIdOutputPort findAdminByDiscordUserIdOutputPort,
+            InsertUserOutputPort insertUserOutputPort,
+            @Qualifier("jdaSendMessageOutputPortAdapter") SendMessageOutputPort jdaSendMessageOutputPortAdapter,
+            TransactionOperations transactionOperations,
+            FindAdminsOutputPort findAdminsOutputPort,
+            FindUserByIdInOutputPort findUserByIdInOutputPort) {
         return new RegisterAdminHandler(new RegisterAdminUseCaseAdapter(findUserByDiscordIdOutputPort,
-                findAdminByDiscordUserIdOutputPort, insertUserOutputPort, sendMessageByDiscordIdOutputPort,
+                findAdminByDiscordUserIdOutputPort, insertUserOutputPort, jdaSendMessageOutputPortAdapter,
                 findAdminsOutputPort, findUserByIdInOutputPort, transactionOperations));
     }
 
@@ -156,8 +165,7 @@ public class MainConfiguration {
             FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByAliasOutputPort,
             InsertReviewerProgrammingLanguageOutputPort insertReviewerProgrammingLanguageOutputPort,
             TransactionOperations transactionOperations,
-            SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort
-            ) {
+            @Qualifier("proxySendMessageOutputPortAdapter") SendMessageOutputPort proxySendMessageOutputPortAdapter) {
         return new ApproveReviewerProgrammingLanguageHandler(new ApproveReviewerProgrammingLanguageUseCaseAdapter(
                 findAdminByDiscordUserIdOutputPort,
                 findUserByNicknameOutputPort,
@@ -165,7 +173,7 @@ public class MainConfiguration {
                 findProgrammingLanguageByAliasOutputPort,
                 insertReviewerProgrammingLanguageOutputPort,
                 transactionOperations,
-                sendMessageByDiscordIdOutputPort));
+                proxySendMessageOutputPortAdapter));
     }
 
     @Bean
@@ -190,16 +198,15 @@ public class MainConfiguration {
     public AddReviewerProgrammingLanguageHandler addReviewerProgrammingLanguageHandler(
             FindReviewerByDiscordIdOutputPort findReviewerByDiscordIdOutputPort,
             EntityManager entityManager,
-            SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort,
+            @Qualifier("jdaSendMessageOutputPortAdapter") SendMessageOutputPort jdaSendMessageOutputPortAdapter,
             FindAdminsOutputPort findAdminsOutputPort,
             FindUserByIdInOutputPort findUserByIdInOutputPort) {
         return new AddReviewerProgrammingLanguageHandler(new AddReviewerProgrammingLanguageUseCaseAdapter(
                 findReviewerByDiscordIdOutputPort,
                 new JavaxPersistenceReviewerProgrammingLanguageExistOutputPortAdapter(entityManager),
-                sendMessageByDiscordIdOutputPort,
+                jdaSendMessageOutputPortAdapter,
                 findAdminsOutputPort,
-                findUserByIdInOutputPort
-                ));
+                findUserByIdInOutputPort));
     }
 
     @Bean
@@ -214,13 +221,13 @@ public class MainConfiguration {
     }
 
     @Bean
-    public CreateSessionHandler createSessionHandler(EntityManager entityManager,
-                                                     SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort,
-                                                     TransactionOperations transactionOperations,
-                                                     FindProgrammingLanguageByAliasOutputPort
-																 findProgrammingLanguageByAliasOutputPort,
-                                                     FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
-                                                     FindStudentByUserIdOutputPort findStudentByUserIdOutputPort) {
+    public CreateSessionHandler createSessionHandler(
+            EntityManager entityManager,
+            @Qualifier("jdaSendMessageOutputPortAdapter") SendMessageOutputPort jdaSendMessageOutputPortAdapter,
+            TransactionOperations transactionOperations,
+            FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByAliasOutputPort,
+            FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
+            FindStudentByUserIdOutputPort findStudentByUserIdOutputPort) {
         return new CreateSessionHandler(new CreateSessionUseCaseAdapter(
                 findUserByDiscordIdOutputPort,
                 findStudentByUserIdOutputPort,
@@ -235,18 +242,18 @@ public class MainConfiguration {
                 new JavaxPersistenceFindUserByIdOutputPortAdapter(entityManager, UserRowMapper.INSTANCE),
                 new JavaxPersistenceInsertSessionOutputPortAdapter(entityManager),
                 new JavaxPersistenceInsertTaskOutputPortAdapter(entityManager),
-                sendMessageByDiscordIdOutputPort,
+                jdaSendMessageOutputPortAdapter,
                 transactionOperations));
     }
 
     @Bean
-    public ReviewCodeHandler reviewCodeHandler(FindUserByNicknameOutputPort findUserByNicknameOutputPort,
-                                               FindStudentByUserIdOutputPort findStudentByUserIdOutputPort,
-                                               EntityManager entityManager,
-                                               FindReviewerByDiscordIdOutputPort findReviewerByDiscordIdOutputPort,
-                                               TransactionOperations transactionOperations,
-                                               SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort
-                                               ) {
+    public ReviewCodeHandler reviewCodeHandler(
+            FindUserByNicknameOutputPort findUserByNicknameOutputPort,
+            FindStudentByUserIdOutputPort findStudentByUserIdOutputPort,
+            EntityManager entityManager,
+            FindReviewerByDiscordIdOutputPort findReviewerByDiscordIdOutputPort,
+            TransactionOperations transactionOperations,
+            @Qualifier("jdaSendMessageOutputPortAdapter") SendMessageOutputPort jdaSendMessageOutputPortAdapter) {
         return new ReviewCodeHandler(new ReviewCodeUseCaseAdapter(findUserByNicknameOutputPort,
                 findStudentByUserIdOutputPort,
                 findReviewerByDiscordIdOutputPort,
@@ -255,7 +262,7 @@ public class MainConfiguration {
                 new JavaxPersistenceUpdateCreatedTaskBySessionIdOutputPortAdapter(entityManager),
                 new JavaxPersistenceFinishAdjustmentSessionOutputPortAdapter(entityManager),
                 transactionOperations,
-                sendMessageByDiscordIdOutputPort));
+                jdaSendMessageOutputPortAdapter));
     }
 
     @Bean
@@ -264,41 +271,31 @@ public class MainConfiguration {
     }
 
     @Bean
-    public ApproveReviewerHandler approveReviewerHandler(EntityManager entityManager,
-                                                         FindAdminByDiscordUserIdOutputPort
-                                                                 findAdminByDiscordUserIdOutputPort,
-                                                         SendMessageByDiscordIdOutputPort
-                                                                 sendMessageByDiscordIdOutputPort,
-                                                         FindUserByNicknameOutputPort findUserByNicknameOutputPort,
-                                                         FindProgrammingLanguageByAliasOutputPort
-																	 findProgrammingLanguageByAliasOutputPort,
-                                                         TransactionOperations transactionOperations,
-                                                         InsertReviewerProgrammingLanguageOutputPort
-                                                                     insertReviewerProgrammingLanguageOutputPort) {
+    public ApproveReviewerHandler approveReviewerHandler(BeanFactory beanFactory) {
         return new ApproveReviewerHandler(new ApproveReviewerUseCaseAdapter(
-                findAdminByDiscordUserIdOutputPort,
-                findUserByNicknameOutputPort,
-                new JavaxPersistenceInsertReviewerOutputPortAdapter(entityManager),
-                insertReviewerProgrammingLanguageOutputPort,
-				findProgrammingLanguageByAliasOutputPort,
-                sendMessageByDiscordIdOutputPort,
-                transactionOperations));
+                beanFactory.getBean(FindAdminByDiscordUserIdOutputPort.class),
+                beanFactory.getBean(FindUserByNicknameOutputPort.class),
+                new JavaxPersistenceInsertReviewerOutputPortAdapter(beanFactory.getBean(EntityManager.class)),
+                beanFactory.getBean(InsertReviewerProgrammingLanguageOutputPort.class),
+				beanFactory.getBean(FindProgrammingLanguageByAliasOutputPort.class),
+                beanFactory.getBean("proxySendMessageOutputPortAdapter", SendMessageOutputPort.class),
+                beanFactory.getBean(TransactionOperations.class),
+                beanFactory.getBean(FindUserByDiscordIdOutputPort.class)));
     }
 
     @Bean
-    public RegisterReviewerHandler registerReviewerHandler(FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
-                                                           InsertUserOutputPort insertUserOutputPort,
-                                                           SendMessageByDiscordIdOutputPort
-                                                                       sendMessageByDiscordIdOutputPort,
-                                                           TransactionOperations transactionOperations,
-                                                           FindReviewerByUserIdOutputPort
-                                                                       findReviewerByUserIdOutputPort,
-                                                           FindAdminsOutputPort findAdminsOutputPort,
-                                                           FindUserByIdInOutputPort findUserByIdInOutputPort) {
+    public RegisterReviewerHandler registerReviewerHandler(
+            FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort,
+            InsertUserOutputPort insertUserOutputPort,
+            @Qualifier("jdaSendMessageOutputPortAdapter") SendMessageOutputPort jdaSendMessageOutputPortAdapter,
+            TransactionOperations transactionOperations,
+            FindReviewerByUserIdOutputPort findReviewerByUserIdOutputPort,
+            FindAdminsOutputPort findAdminsOutputPort,
+            FindUserByIdInOutputPort findUserByIdInOutputPort) {
         return new RegisterReviewerHandler(new RegisterReviewerUseCaseAdapter(findUserByDiscordIdOutputPort,
                 findReviewerByUserIdOutputPort,
                 insertUserOutputPort,
-                sendMessageByDiscordIdOutputPort,
+                jdaSendMessageOutputPortAdapter,
                 findAdminsOutputPort,
                 findUserByIdInOutputPort,
                 transactionOperations));
@@ -333,15 +330,15 @@ public class MainConfiguration {
     }
 
     @Bean
-    public FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByNameOutputPort(EntityManager
-                                                                                                       entityManager) {
+    public FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByNameOutputPort(
+            EntityManager entityManager) {
         return new JavaxPersistenceFindProgrammingLanguageByAliasOutputPortAdapter(entityManager,
                 ProgrammingLanguageRowMapper.INSTANCE);
     }
 
     @Bean
-    public SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort(@Qualifier("jdaSender") JDA jda) {
-        return new JdaSendMessageByDiscordIdOutputPortAdapter(jda);
+    public SendMessageOutputPort jdaSendMessageOutputPortAdapter(@Qualifier("jdaSender") JDA jda) {
+        return new JdaSendMessageOutputPortAdapter(jda);
     }
 
     @Bean
@@ -357,5 +354,24 @@ public class MainConfiguration {
     @Bean
     public FindStudentByUserIdOutputPort findStudentByUserIdOutputPort(EntityManager entityManager) {
         return new JavaxPersistenceFindStudentByUserIdOutputPortAdapter(entityManager, StudentRowMapper.INSTANCE);
+    }
+
+    @Bean
+    public SendMessageOutputPort javaxMailSendMessageOutputPortAdapter(
+            @Value("${mail.email}") String emailAddress,
+            @Value("${mail.password}") String password,
+            @Value("${mail.host}") String host,
+            @Value("${mail.port}") int port) throws AddressException {
+        return new JavaxMailSendMessageOutputPortAdapter(new InternetAddress(emailAddress), password, host, port);
+    }
+
+    @Bean
+    public SendMessageOutputPort proxySendMessageOutputPortAdapter(
+            @Qualifier("jdaSendMessageOutputPortAdapter") SendMessageOutputPort jdaSendMessageOutputPortAdapter,
+            @Qualifier("telegramSendMessageOutputPortAdapter") SendMessageOutputPort telegramSendMessageOutputPort,
+            @Qualifier("javaxMailSendMessageOutputPortAdapter") SendMessageOutputPort
+                    javaxMailSendMessageOutputPortAdapter) {
+        return new ProxySendMessageOutputPortAdapter(List.of(jdaSendMessageOutputPortAdapter,
+                telegramSendMessageOutputPort, javaxMailSendMessageOutputPortAdapter));
     }
 }

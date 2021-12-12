@@ -17,7 +17,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public final class JavaxPersistenceFindUserIdByTelegramNicknameOutputPortAdapter
 		implements FindUserIdByTelegramNicknameOutputPort {
-	public static final String QUERY = "select id_user from t_telegram_request where c_nickname ilike :nickname";
+	public static final String QUERY = "select id_user from t_telegram_request " +
+			"where c_telegram_nickname ilike :nickname";
 	public static final String PARAM_NICKNAME = "nickname";
 
 	@NonNull

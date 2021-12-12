@@ -49,7 +49,7 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 	private final InsertTaskOutputPort insertTaskOutputPort;
 
 	@NonNull
-	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+	private final SendMessageOutputPort sendMessageOutputPort;
 
 	@NonNull
 	private final TransactionOperations transactionOperations;
@@ -65,11 +65,10 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 										this.findAdjustmentSessionByURLLinkOutputPort
 												.findAdjustmentSessionByURLLink(command.getTaskUrlLink())
 												.map(session -> {
-													this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
-															this.findUserByIdOutputPort.findUserById(
-																	this.findReviewerByIdOutputPort.findReviewerById(
-																			session.getReviewerId())
-																			.getUserId()).getDiscordId(),
+													this.sendMessageOutputPort.sendMessage(this.findUserByIdOutputPort
+																	.findUserById(this.findReviewerByIdOutputPort
+																			.findReviewerById(session.getReviewerId())
+																			.getUserId()),
 															command.getTaskUrlLink() + LINE_BREAK + command
 																	.getCodeText());
 													return CreateSession.Result.success(this.insertTaskOutputPort
@@ -82,12 +81,11 @@ public final class CreateSessionUseCaseAdapter implements CreateSessionUseCase {
 												.orElse(this.findReviewerOutputPort.findReviewer(programmingLanguage
 														.getId())
 														.map(reviewer -> {
-															this.sendMessageByDiscordIdOutputPort
-																	.sendMessageByDiscordId(this.findUserByIdOutputPort
-																			.findUserById(reviewer.getUserId())
-																			.getDiscordId(),
-																			command.getTaskUrlLink() +
-																					LINE_BREAK + command.getCodeText());
+															this.sendMessageOutputPort.sendMessage(
+																	this.findUserByIdOutputPort.findUserById(reviewer
+																			.getUserId()),
+																	command.getTaskUrlLink() + LINE_BREAK +
+																			command.getCodeText());
 															return CreateSession.Result.success(
 																	this.insertTaskOutputPort.insertTask(TaskRow.of(
 																		null,
