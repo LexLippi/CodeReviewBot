@@ -37,10 +37,13 @@ public final class ApproveReviewerUseCaseAdapter implements ApproveReviewerUseCa
 	private final FindProgrammingLanguageByAliasOutputPort findProgrammingLanguageByAliasOutputPort;
 
 	@NonNull
-	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+	private final SendMessageOutputPort sendMessageOutputPort;
 
 	@NonNull
 	private final TransactionOperations transactionOperations;
+
+	@NonNull
+	private final FindUserByDiscordIdOutputPort findUserByDiscordIdOutputPort;
 
 	@Override
 	@NonNull
@@ -60,12 +63,12 @@ public final class ApproveReviewerUseCaseAdapter implements ApproveReviewerUseCa
 																		ReviewerProgrammingLanguageRow.of(null,
 																				reviewerId,
 																				programmingLanguage.getId())),
-														() -> this.sendMessageByDiscordIdOutputPort
-																.sendMessageByDiscordId(command.getDiscordUserId(),
-																		ERROR_NAME)));
+														() -> this.sendMessageOutputPort.sendMessage(
+																this.findUserByDiscordIdOutputPort.findUserByDiscordId(
+																		command.getDiscordUserId()).orElseThrow(),
+																ERROR_NAME)));
 							});
-							this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(user.getDiscordId(),
-									YOU_SUCCESSFULLY_ADDED_TO_REVIEWERS);
+							this.sendMessageOutputPort.sendMessage(user, YOU_SUCCESSFULLY_ADDED_TO_REVIEWERS);
 							return ApproveReviewer.Result.success(user.getNickname());
 						})
 						.orElse(ApproveReviewer.Result.userNotFound(command.getNickname())))

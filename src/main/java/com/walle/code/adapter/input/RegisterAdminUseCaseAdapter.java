@@ -32,7 +32,7 @@ public final class RegisterAdminUseCaseAdapter implements RegisterAdminUseCase {
 	private final InsertUserOutputPort insertUserOutputPort;
 
 	@NonNull
-	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+	private final SendMessageOutputPort sendMessageOutputPort;
 
 	@NonNull
 	private final FindAdminsOutputPort findAdminsOutputPort;
@@ -55,9 +55,8 @@ public final class RegisterAdminUseCaseAdapter implements RegisterAdminUseCase {
 									.stream()
 									.map(AdminRow::getUserId)
 									.collect(toSet()))
-									.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
-											adminUser.getDiscordId(),
-											 THIS_USER + command.getNickname() + WANT_TO_BE_ADMIN));
+									.forEach(adminUser -> this.sendMessageOutputPort.sendMessage(adminUser,
+											THIS_USER + command.getNickname() + WANT_TO_BE_ADMIN));
 							return RegisterAdmin.Result.success();
 						}))
 				.orElseGet(() -> {
@@ -73,8 +72,7 @@ public final class RegisterAdminUseCaseAdapter implements RegisterAdminUseCase {
 							.stream()
 							.map(AdminRow::getUserId)
 							.collect(toSet()))
-							.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
-									adminUser.getDiscordId(),
+							.forEach(adminUser -> this.sendMessageOutputPort.sendMessage(adminUser,
 									THIS_USER + command.getNickname() + WANT_TO_BE_ADMIN));
 					return RegisterAdmin.Result.success();
 				});

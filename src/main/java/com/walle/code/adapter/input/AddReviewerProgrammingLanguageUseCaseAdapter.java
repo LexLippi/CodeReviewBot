@@ -27,7 +27,7 @@ public final class AddReviewerProgrammingLanguageUseCaseAdapter implements AddRe
 	private final ReviewerProgrammingLanguageExistOutputPort reviewerProgrammingLanguageExistOutputPort;
 
 	@NonNull
-	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+	private final SendMessageOutputPort sendMessageOutputPort;
 
 	@NonNull
 	private final FindAdminsOutputPort findAdminsOutputPort;
@@ -49,8 +49,7 @@ public final class AddReviewerProgrammingLanguageUseCaseAdapter implements AddRe
 									.stream()
 									.map(AdminRow::getUserId)
 									.collect(toSet()))
-									.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
-											adminUser.getDiscordId(),
+									.forEach(adminUser -> this.sendMessageOutputPort.sendMessage(adminUser,
 											command.getNickname() + REVIEWER_WANT +
 													command.getProgrammingLanguageAlias() + CONNECT_WITH_HIM));
 							return AddReviewerProgrammingLanguage.Result.success();

@@ -33,7 +33,7 @@ public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUse
 	private final InsertUserOutputPort insertUserOutputPort;
 
 	@NonNull
-	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+	private final SendMessageOutputPort sendMessageOutputPort;
 
 	@NonNull
 	private final FindAdminsOutputPort findAdminsOutputPort;
@@ -55,11 +55,10 @@ public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUse
 									.stream()
 									.map(AdminRow::getUserId)
 									.collect(toSet()))
-									.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
-											adminUser.getDiscordId(),
-											 THIS_USER + command.getNickname() + WANT_TO_BE_REVIEWER +
-													 String.join(",", command.getProgrammingLanguages()) +
-													 PLEASE_CONNECT));
+									.forEach(adminUser -> this.sendMessageOutputPort.sendMessage(adminUser,
+											THIS_USER + command.getNickname() + WANT_TO_BE_REVIEWER +
+													String.join(",", command.getProgrammingLanguages()) +
+													PLEASE_CONNECT));
 							return RegisterReviewer.Result.success();
 						}))
 				.orElseGet(() -> {
@@ -75,8 +74,7 @@ public final class RegisterReviewerUseCaseAdapter implements RegisterReviewerUse
 							.stream()
 							.map(AdminRow::getUserId)
 							.collect(toSet()))
-							.forEach(adminUser -> this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
-									adminUser.getDiscordId(),
+							.forEach(adminUser -> this.sendMessageOutputPort.sendMessage(adminUser,
 									THIS_USER + command.getNickname() + WANT_TO_BE_REVIEWER));
 					return RegisterReviewer.Result.success();
 				});

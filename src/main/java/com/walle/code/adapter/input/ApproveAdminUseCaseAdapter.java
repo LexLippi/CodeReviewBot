@@ -28,7 +28,7 @@ public final class ApproveAdminUseCaseAdapter implements ApproveAdminUseCase {
 	private final InsertAdminOutputPort insertAdminOutputPort;
 
 	@NonNull
-	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+	private final SendMessageOutputPort sendMessageOutputPort;
 
 	@NonNull
 	private final TransactionOperations transactionOperations;
@@ -41,8 +41,7 @@ public final class ApproveAdminUseCaseAdapter implements ApproveAdminUseCase {
 						.map(user -> {
 							this.transactionOperations.executeWithoutResult(status -> this.insertAdminOutputPort
 									.insertAdmin(AdminRow.of(null, user.getId())));
-							this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(user.getDiscordId(),
-									YOU_SUCCESSFULLY_ADDED_TO_ADMINS);
+							this.sendMessageOutputPort.sendMessage(user, YOU_SUCCESSFULLY_ADDED_TO_ADMINS);
 							return ApproveAdmin.Result.success(user.getNickname());
 						})
 						.orElse(ApproveAdmin.Result.userNotFound(command.getNickname())))

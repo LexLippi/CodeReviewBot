@@ -39,7 +39,7 @@ public final class ApproveReviewerProgrammingLanguageUseCaseAdapter
 	private final TransactionOperations transactionOperations;
 
 	@NonNull
-	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+	private final SendMessageOutputPort sendMessageOutputPort;
 
 	@Override
 	@NonNull
@@ -58,8 +58,7 @@ public final class ApproveReviewerProgrammingLanguageUseCaseAdapter
 																	ReviewerProgrammingLanguageRow.of(null,
 																			reviewer.getId(),
 																			programmingLanguage.getId())));
-											this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
-													reviewerUser.getDiscordId(),
+											this.sendMessageOutputPort.sendMessage(reviewerUser,
 													REQUEST + programmingLanguage.getName() + APPROVED);
 											return ApproveReviewerProgrammingLanguage.Result.success();
 										})
