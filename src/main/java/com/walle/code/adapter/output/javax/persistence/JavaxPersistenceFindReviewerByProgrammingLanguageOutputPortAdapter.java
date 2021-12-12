@@ -56,11 +56,11 @@ public final class JavaxPersistenceFindReviewerByProgrammingLanguageOutputPortAd
 
             if (sortedListOfReviewers.size() <= 1 ||
                 reviewerRowComparator.compare(optimal, sortedListOfReviewers.get(1)) == 0)
-                return Optional.of(optimal.reviewerRow);
+                return Optional.of(optimal.getReviewerRow());
         }
         return resultList.stream().map(result -> rowWrappers.get(1)
                         .wrapRow(this.rowMapper.mapRow((Tuple) result), entityManager))
                 .min(reviewerRowComparator)
-                .map(result -> ((ReviewerRowWrap<Integer>)result).reviewerRow);
+                .map(result -> ((ReviewerRowWrap<Integer>)result).getReviewerRow());
     }
 }
