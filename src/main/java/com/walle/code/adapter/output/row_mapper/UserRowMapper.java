@@ -7,6 +7,7 @@ import com.walle.code.dto.row.UserRow;
 import lombok.NonNull;
 
 import javax.persistence.Tuple;
+import java.math.BigInteger;
 
 public enum UserRowMapper implements RowMapper<UserRow> {
 	INSTANCE;
@@ -22,12 +23,14 @@ public enum UserRowMapper implements RowMapper<UserRow> {
 	@Override
 	@NonNull
 	public UserRow mapRow(@NonNull Tuple resultSet) {
+		var chatId = resultSet.get(PARAM_ID_CHAT, BigInteger.class);
+
 		return UserRow.of(UserId.of(resultSet.get(PARAM_ID, Integer.class)),
 				DiscordUserId.of(resultSet.get(PARAM_ID_DISCORD, String.class)),
 				resultSet.get(PARAM_C_NICKNAME, String.class),
 				resultSet.get(PARAM_C_FIRST_NAME, String.class),
 				resultSet.get(PARAM_C_SURNAME, String.class),
 				Email.of(resultSet.get(PARAM_C_EMAIL, String.class)),
-				resultSet.get(PARAM_ID_CHAT, Long.class));
+				chatId == null ? null : chatId.longValue());
 	}
 }

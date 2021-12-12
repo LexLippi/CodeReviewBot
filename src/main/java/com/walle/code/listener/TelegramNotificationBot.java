@@ -24,7 +24,7 @@ public final class TelegramNotificationBot extends TelegramLongPollingCommandBot
 	@NonNull
 	private final String botToken;
 
-	public TelegramNotificationBot(@NonNull String botName, @NonNull String botToken,
+	public TelegramNotificationBot(@NonNull String botToken, @NonNull String botName,
 								   @NonNull AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler) {
 		super();
 

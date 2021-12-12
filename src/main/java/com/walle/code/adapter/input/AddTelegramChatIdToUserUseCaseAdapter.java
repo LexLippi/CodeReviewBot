@@ -6,6 +6,7 @@ import com.walle.code.port.output.FindUserIdByTelegramNicknameOutputPort;
 import com.walle.code.port.output.UpdateUserChatIdByIdOutputPort;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.support.TransactionOperations;
 
 /**
  * Реализация {@link AddTelegramChatIdToUserUseCase}
@@ -21,13 +22,18 @@ public final class AddTelegramChatIdToUserUseCaseAdapter implements AddTelegramC
 	@NonNull
 	private final UpdateUserChatIdByIdOutputPort updateUserChatIdByIdOutputPort;
 
+	@NonNull
+	private final TransactionOperations transactionOperations;
+
 	@Override
 	@NonNull
 	public AddTelegramChatIdToUser.Result addTelegramChatIdToUser(@NonNull AddTelegramChatIdToUser command) {
 		return this.findUserIdByTelegramNicknameOutputPort.findUserIdByTelegramNicknameOutputPort(
 				command.getTelegramNickname())
 				.map(userId -> {
-					this.updateUserChatIdByIdOutputPort.updateUserChatIdById(userId, command.getTelegramChatId());
+					this.transactionOperations.executeWithoutResult(transactionStatus ->
+							this.updateUserChatIdByIdOutputPort.updateUserChatIdById(userId,
+									command.getTelegramChatId()));
 					return AddTelegramChatIdToUser.Result.success();
 				})
 				.orElse(AddTelegramChatIdToUser.Result.requestForConnectNotFound());

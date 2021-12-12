@@ -39,7 +39,7 @@ public final class ReviewCodeUseCaseAdapter implements ReviewCodeUseCase {
 	private final TransactionOperations transactionOperations;
 
 	@NonNull
-	private final SendMessageByDiscordIdOutputPort sendMessageByDiscordIdOutputPort;
+	private final SendMessageOutputPort sendMessageOutputPort;
 
 	@Override
 	@NonNull
@@ -61,8 +61,7 @@ public final class ReviewCodeUseCaseAdapter implements ReviewCodeUseCase {
 															session.getId());
 												}
 											});
-											this.sendMessageByDiscordIdOutputPort.sendMessageByDiscordId(
-													user.getDiscordId(), command.getText());
+											this.sendMessageOutputPort.sendMessage(user, command.getText());
 											return ReviewCode.Result.success();
 										})
 										.orElse(ReviewCode.Result.sessionNotFound()))
