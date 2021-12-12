@@ -57,11 +57,13 @@ public class MainConfiguration {
     }
 
     @Bean
-    public AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler(EntityManager entityManager) {
+    public AddTelegramChatIdToUserHandler addTelegramChatIdToUserHandler(EntityManager entityManager,
+                                                                         TransactionOperations transactionOperations) {
         return new AddTelegramChatIdToUserHandler("start", "Начать",
                 new AddTelegramChatIdToUserUseCaseAdapter(
                         new JavaxPersistenceFindUserIdByTelegramNicknameOutputPortAdapter(entityManager),
-                        new JavaxPersistenceUpdateUserChatIdByIdOutputPortAdapter(entityManager)));
+                        new JavaxPersistenceUpdateUserChatIdByIdOutputPortAdapter(entityManager),
+                        transactionOperations));
     }
 
     @Bean
@@ -102,6 +104,11 @@ public class MainConfiguration {
                 beanFactory.getBean(RegisterAdminHandler.class),
                 beanFactory.getBean(ApproveAdminHandler.class),
                 beanFactory.getBean(GetHelperHandler.class)));
+    }
+
+    @Bean
+    public GetHelperHandler getHelperHandler() {
+        return new GetHelperHandler();
     }
 
     @Bean

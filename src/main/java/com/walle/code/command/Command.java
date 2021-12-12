@@ -31,7 +31,7 @@ public abstract class Command {
 
 	private final Map<String, Object> params;
 
-	public Command(@NonNull Instant timestamp, @NonNull DiscordUserId discordUserId) {
+	public Command(@NonNull Instant timestamp, DiscordUserId discordUserId) {
 		this(timestamp, discordUserId, Map.of());
 	}
 }
