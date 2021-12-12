@@ -29,6 +29,6 @@ public enum ReviewerRowTasksWrapper implements RowWrapper<ReviewerRow, ReviewerR
                 .getResultList()
                 .stream()
                 .findFirst()
-                .get()).intValue(), resultSet);
+                .orElseThrow()).intValue(), resultSet);
     }
 }
