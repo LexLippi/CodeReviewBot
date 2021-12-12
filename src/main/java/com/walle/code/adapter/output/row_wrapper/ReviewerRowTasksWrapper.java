@@ -8,7 +8,7 @@ import javax.persistence.EntityManager;
 import java.math.BigInteger;
 
 /**
- * Реализация {@link RowWrapper<ReviewerRow, ReviewerRowWrap<Integer>>}
+ * Реализация {@link RowWrapper}
  * В качестве обёртки выступает нагрузка по количеству задач
  *
  * @author <a href="mailto:aleksey.bykov.01@mail.ru">Алексей Быков</a>.
